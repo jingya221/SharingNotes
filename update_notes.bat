@@ -264,7 +264,7 @@ echo.
 echo 🎉 操作成功完成！
 echo.
 echo 📱 如果推送成功，更改将在几分钟内反映到GitHub Pages
-echo    https://jingya221.github.io/MyNotes/
+echo    https://github.com/jingya221/SharingNotes
 echo.
 goto end_script
 

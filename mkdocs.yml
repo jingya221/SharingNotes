@@ -101,7 +101,3 @@ nav:
   - r-project-guide:
     - 01-R项目结构: notes/r-project-guide/01-R项目结构.md
     - 02-R程序指南: notes/r-project-guide/02-R程序指南.md
-- 使用指南:
-  - 如何使用: guide/usage.md
-  - 添加笔记: guide/add-notes.md
-  - 更新索引: guide/update-index.md

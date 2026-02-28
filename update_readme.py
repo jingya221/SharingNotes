@@ -186,12 +186,7 @@ def update_mkdocs_nav(markdown_files):
     # 创建完整的导航结构
     new_nav = [
         {'首页': 'index.md'},
-        {'笔记分类': nav_notes},
-        {'使用指南': [
-            {'如何使用': 'guide/usage.md'},
-            {'添加笔记': 'guide/add-notes.md'},
-            {'更新索引': 'guide/update-index.md'}
-        ]}
+        {'笔记分类': nav_notes}
     ]
     
     # 直接替换整个导航配置
