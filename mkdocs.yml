@@ -101,6 +101,6 @@ nav:
   - r-programming:
     - test: notes/r-programming/test.md
   - r-project-guide:
-    - 01-R项目结构: notes/r-project-guide/01-R项目结构.md
     - 03-内置funcion介绍: notes/r-project-guide/03-内置funcion介绍.md
-    - 一级目录 ------------------------------------------------------------------: notes/r-project-guide/02-R程序常见用法.md
+    - R程序常见用法: notes/r-project-guide/02-R程序常见用法.md
+    - R项目结构: notes/r-project-guide/01-R项目结构.md
