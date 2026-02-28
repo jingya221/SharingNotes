@@ -1,5 +1,5 @@
-site_name: R Project 开发指南
-site_description: R语言项目开发的最佳实践和指南文档
+site_name: 临床R语言编程
+site_description: 临床研究中R语言编程的指南和最佳实践
 site_author: Jingya Wang
 site_url: https://jingya221.github.io/SharingNotes/
 repo_name: jingya221/SharingNotes
