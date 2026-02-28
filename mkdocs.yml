@@ -1,0 +1,107 @@
+site_name: R Project 开发指南
+site_description: R语言项目开发的最佳实践和指南文档
+site_author: Jingya Wang
+site_url: https://jingya221.github.io/SharingNotes/
+repo_name: jingya221/SharingNotes
+repo_url: https://github.com/jingya221/SharingNotes
+edit_uri: edit/main/docs/
+copyright: Copyright &copy; 2026 Jingya Wang
+theme:
+  name: material
+  language: zh
+  icon:
+    logo: material/notebook
+  palette:
+  - scheme: default
+    primary: teal
+    accent: teal
+    toggle:
+      icon: material/brightness-7
+      name: 切换至深色模式
+  - scheme: slate
+    primary: teal
+    accent: teal
+    toggle:
+      icon: material/brightness-4
+      name: 切换至浅色模式
+  features:
+  - announce.dismiss
+  - content.action.edit
+  - content.action.view
+  - content.code.annotate
+  - content.code.copy
+  - content.tabs.link
+  - content.tooltips
+  - header.autohide
+  - navigation.expand
+  - navigation.footer
+  - navigation.indexes
+  - navigation.instant
+  - navigation.instant.prefetch
+  - navigation.instant.progress
+  - navigation.prune
+  - navigation.sections
+  - navigation.tabs
+  - navigation.tabs.sticky
+  - navigation.top
+  - navigation.tracking
+  - search.highlight
+  - search.share
+  - search.suggest
+  - toc.follow
+plugins:
+- search:
+    separator: '[\s\u200b\-]'
+- minify:
+    minify_html: true
+extra:
+  social:
+  - icon: fontawesome/brands/github
+    link: https://github.com/jingya221
+  generator: false
+markdown_extensions:
+- abbr
+- admonition
+- attr_list
+- def_list
+- footnotes
+- md_in_html
+- tables
+- toc:
+    permalink: true
+    title: 目录导航
+- pymdownx.arithmatex:
+    generic: true
+- pymdownx.betterem:
+    smart_enable: all
+- pymdownx.caret
+- pymdownx.details
+- pymdownx.emoji
+- pymdownx.highlight:
+    anchor_linenums: true
+    line_spans: __span
+    pygments_lang_class: true
+- pymdownx.inlinehilite
+- pymdownx.keys
+- pymdownx.magiclink:
+    repo_url_shorthand: true
+    user: jingya221
+    repo: SharingNotes
+- pymdownx.mark
+- pymdownx.smartsymbols
+- pymdownx.superfences
+- pymdownx.tabbed:
+    alternate_style: true
+- pymdownx.tasklist:
+    custom_checkbox: true
+- pymdownx.tilde
+nav:
+- 首页: index.md
+- 笔记分类:
+  - r-project-guide:
+    - 01-R项目结构: notes/r-project-guide/01-R项目结构.md
+    - 02-R程序指南: notes/r-project-guide/02-R程序指南.md
+- 使用指南:
+  - 如何使用: guide/usage.md
+  - 添加笔记: guide/add-notes.md
+  - 更新索引: guide/update-index.md
