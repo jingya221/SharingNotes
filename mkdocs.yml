@@ -98,8 +98,8 @@ markdown_extensions:
 nav:
 - 首页: index.md
 - 笔记分类:
-  - 01-r-project-guide:
-    - 01-R项目结构: notes/01-r-project-guide/01-R项目结构.md
-    - 02-R程序指南: notes/01-r-project-guide/02-R程序指南.md
-  - 02-r-programming:
-    - test: notes/02-r-programming/test.md
+  - r-programming:
+    - test: notes/r-programming/test.md
+  - r-project-guide:
+    - 01-R项目结构: notes/r-project-guide/01-R项目结构.md
+    - 02-R程序指南: notes/r-project-guide/02-R程序指南.md

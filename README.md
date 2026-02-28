@@ -10,18 +10,18 @@
 
 ## 📚 指南内容
 
-### 🗂️ 01-r-project-guide
+### 🗂️ r-programming
 
-#### [01-R项目结构](docs/notes/01-r-project-guide/01-R项目结构.md)
+#### [test](docs/notes/r-programming/test.md)
+
+
+### 🗂️ r-project-guide
+
+#### [01-R项目结构](docs/notes/r-project-guide/01-R项目结构.md)
 > 案例来源SHR-1811-206项目，QC部分用R写代码，spec和codelist共用main...
 
 
-#### [02-R程序指南](docs/notes/01-r-project-guide/02-R程序指南.md)
-
-
-### 🗂️ 02-r-programming
-
-#### [test](docs/notes/02-r-programming/test.md)
+#### [02-R程序指南](docs/notes/r-project-guide/02-R程序指南.md)
 
 ---
 
