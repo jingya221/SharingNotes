@@ -22,10 +22,11 @@
 
 
 #### [02-R程序常见用法](docs/notes/r-project-guide/02-R程序常见用法.md)
-> 包含一些使用规则和大致逻辑
+> 包含一些程序创建和使用方式
 
 
 #### [03-内置funcion介绍](docs/notes/r-project-guide/03-内置funcion介绍.md)
+调用案例：
 
 ---
 
@@ -33,7 +34,7 @@
 
 - **指南分类**: 2 个
 - **文档数量**: 4 篇
-- **最近更新**: 2026-02-28
+- **最近更新**: 2026-03-02
 
 ---
 
@@ -78,7 +79,7 @@ SharingNotes/
 
 ---
 
-*📅 最后更新: 2026-02-28*
+*📅 最后更新: 2026-03-02*
 
 <p align="center">
   © 2026 Jingya Wang | <a href="https://github.com/jingya221/SharingNotes">GitHub</a>
