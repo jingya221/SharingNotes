@@ -1,6 +1,5 @@
 @echo off
 setlocal enabledelayedexpansion
-cd /d "%~dp0"
 chcp 65001 >nul
 echo ==========================================
 echo      📝 Markdown笔记系统更新工具
@@ -77,7 +76,7 @@ echo 📍 使用Python: %PYTHON_CMD%
 echo.
 
 REM 检查Python是否能正常运行
-echo [*] 测试Python环境...
+echo 🧪 测试Python环境...
 %PYTHON_CMD% --version
 if %errorlevel% neq 0 (
     echo ❌ Python无法正常运行
@@ -92,7 +91,6 @@ echo.
 
 REM 执行 update_readme.py：更新 index.md、mkdocs.yml、README.md
 REM README 导览链接统一为 .md 文件路径（如 docs/notes/AI相关/R-shiny-with-AI.md）
-set PYTHONIOENCODING=utf-8
 %PYTHON_CMD% update_readme.py
 set PYTHON_EXIT_CODE=%errorlevel%
 
@@ -120,14 +118,13 @@ REM 检查是否有未提交的更改
 echo 🔍 检查Git状态...
 git status --porcelain >temp_status.txt 2>nul
 if exist temp_status.txt (
-    set git_changes=
-    for /f "usebackq tokens=*" %%i in ("temp_status.txt") do set git_changes=%%i
+    for /f %%i in (temp_status.txt) do set git_changes=%%i
     del temp_status.txt
 ) else (
     set git_changes=
 )
 
-if "!git_changes!"=="" (
+if "%git_changes%"=="" (
     echo ℹ️  没有检测到文件更改，无需Git操作。
     echo.
     echo ==========================================
@@ -267,7 +264,7 @@ echo.
 echo 🎉 操作成功完成！
 echo.
 echo 📱 如果推送成功，更改将在几分钟内反映到GitHub Pages
-echo    https://github.com/jingya221/SharingNotes
+echo    https://jingya221.github.io/MyNotes/
 echo.
 goto end_script
 

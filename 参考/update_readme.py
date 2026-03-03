@@ -7,15 +7,10 @@ MkDocs笔记自动索引生成器
 
 import os
 import re
-import sys
 import yaml
 from datetime import datetime
 from pathlib import Path
 from collections import defaultdict, OrderedDict
-
-# 修复 Windows 控制台输出编码，避免 emoji 在 GBK 下报错
-if sys.platform.startswith('win') and hasattr(sys.stdout, 'reconfigure'):
-    sys.stdout.reconfigure(encoding='utf-8')
 
 def extract_title_from_markdown(file_path):
     """从markdown文件中提取标题"""
@@ -186,7 +181,12 @@ def update_mkdocs_nav(markdown_files):
     # 创建完整的导航结构
     new_nav = [
         {'首页': 'index.md'},
-        {'笔记分类': nav_notes}
+        {'笔记分类': nav_notes},
+        {'使用指南': [
+            {'如何使用': 'guide/usage.md'},
+            {'添加笔记': 'guide/add-notes.md'},
+            {'更新索引': 'guide/update-index.md'}
+        ]}
     ]
     
     # 直接替换整个导航配置
@@ -216,13 +216,13 @@ def update_index_page(markdown_files):
     sorted_categories = sorted(categories.keys(), key=lambda x: (x != "根目录", x))
     
     for category in sorted_categories:
-        notes_content.append(f"### 🗂️ {category}")
+        notes_content.append(f"### {category}")
         files = categories[category]
         if files:
             for file_info in sorted(files, key=lambda x: x['title']):
                 page_path = file_info['relative_path'].replace('\\', '/').replace('.md', '')
-                description = f"\n{file_info['description']}" if file_info['description'] else ""
-                notes_content.append(f"\n#### [{file_info['title']}](notes/{page_path}){description}\n")
+                description = f" - {file_info['description']}" if file_info['description'] else ""
+                notes_content.append(f"- [{file_info['title']}](notes/{page_path}){description}")
         else:
             notes_content.append("*该分类暂无笔记*")
         notes_content.append("")
@@ -231,30 +231,30 @@ def update_index_page(markdown_files):
     total_files = len(markdown_files)
     total_categories = len(categories)
     latest_note = markdown_files[0]['title'] if markdown_files else "无"
-    update_date = datetime.now().strftime('%Y-%m-%d')
     
     # 构建新的首页内容
-    new_content = f"""# 临床R语言编程
+    new_content = f"""# 📚 个人笔记系统
 
----
+欢迎来到我的个人笔记管理系统！这里收录了各种学习笔记和技术文档。
 
-## 📚 指南内容
+## 📋 笔记目录
 
 {chr(10).join(notes_content).rstrip()}
+## 🔧 使用指南
 
----
+- [基础使用指南](guide/usage.md) - 了解如何使用这个笔记系统
+- [添加新笔记](guide/add-notes.md) - 学习如何创建和组织新的笔记文件  
+- [更新索引](guide/update-index.md) - 如何自动更新和维护笔记索引
 
 ## 📊 统计信息
 
-- **指南分类**: {total_categories} 个
-- **文档数量**: {total_files} 篇
-- **最近更新**: {update_date}
+- **笔记分类**: {total_categories}个
+- **总笔记数**: {total_files}篇
+- **最近更新**: {latest_note}
 
 ---
 
-<p align="center">
-  <small>© 2026 Jingya Wang | <a href="https://github.com/jingya221/SharingNotes">GitHub</a></small>
-</p>"""
+> 💡 **提示**: 点击左侧导航栏可以快速浏览所有笔记分类，使用顶部搜索功能可以快速查找内容。"""
     
     # 写入文件
     with open(index_file, 'w', encoding='utf-8') as file:
@@ -292,13 +292,11 @@ def update_readme_from_index():
         )
         
         # 添加README.md特有的说明
-        readme_header = """# 临床R语言编程
+        readme_header = """# 📚 个人笔记系统
 
-> 🌐 **在线浏览**: [https://jingya221.github.io/SharingNotes/](https://jingya221.github.io/SharingNotes/)
+> 🌐 **在线浏览**: [https://jingya221.github.io/MyNotes/](https://jingya221.github.io/MyNotes/)
 
-临床研究中R语言编程的指南和最佳实践。
-
----
+欢迎来到我的个人笔记管理系统！这里收录了各种学习笔记和技术文档。
 
 """
         
@@ -306,50 +304,38 @@ def update_readme_from_index():
 
 ---
 
-## 🚀 快速开始
+## 🚀 如何使用
 
-### 在线浏览（推荐）
-访问 [https://jingya221.github.io/SharingNotes/](https://jingya221.github.io/SharingNotes/)
-
-### 本地运行
-```bash
-# 克隆仓库
-git clone https://github.com/jingya221/SharingNotes.git
-cd SharingNotes
-
-# 安装依赖
-pip install mkdocs mkdocs-material mkdocs-minify-plugin
-
-# 本地预览
-mkdocs serve
-```
-
----
+1. **在线浏览**: 访问 [GitHub Pages](https://jingya221.github.io/MyNotes/) 获得最佳阅读体验
+2. **本地运行**: 
+   ```bash
+   pip install mkdocs mkdocs-material
+   mkdocs serve
+   ```
+3. **添加笔记**: 在 `docs/notes/` 文件夹中创建新的markdown文件
+4. **自动更新**: 运行 `python update_readme.py` 或 `update_notes.bat` 自动更新索引
 
 ## 📁 项目结构
 
 ```
-SharingNotes/
-├── docs/
-│   ├── index.md
-│   └── notes/
-│       └── r-project-guide/
-├── mkdocs.yml
-├── update_readme.py
-└── README.md
+NotesGit/
+├── docs/                    # MkDocs文档目录
+│   ├── index.md            # 首页
+│   ├── notes/              # 笔记文件夹
+│   └── guide/              # 使用指南
+├── mkdocs.yml              # MkDocs配置文件
+├── update_readme.py        # 自动更新脚本
+├── update_notes.bat        # Windows批处理文件
+└── README.md               # 项目说明（本文件）
 ```
 
 ---
 
-*📅 最后更新: {datetime.now().strftime('%Y-%m-%d')}*
-
-<p align="center">
-  © 2026 Jingya Wang | <a href="https://github.com/jingya221/SharingNotes">GitHub</a>
-</p>
+*📅 最后更新: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}*
 """
         
         # 替换首页标题和说明
-        readme_content = re.sub(r'^# .*?\n\n', '', readme_content, flags=re.MULTILINE | re.DOTALL)
+        readme_content = re.sub(r'^# 📚 个人笔记系统\n\n.*?\n\n', '', readme_content, flags=re.MULTILINE | re.DOTALL)
         
         # 组合最终内容
         final_content = readme_header + readme_content + readme_footer
