@@ -1,0 +1,29 @@
+/* 全宽布局：左右侧栏贴边，中间内容区更宽 */
+
+/* 取消整体网格最大宽度限制，占满视口 */
+.md-grid,
+.md-main__inner.md-grid {
+  max-width: initial;
+}
+
+/* 主容器与内层不额外留白，让左右栏贴边 */
+.md-main {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.md-main__inner {
+  margin-left: 0;
+  margin-right: 0;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* 中间内容区不限制最大宽度，用满剩余空间 */
+.md-content {
+  max-width: none;
+}
+
+.md-content__inner {
+  max-width: none;
+}
