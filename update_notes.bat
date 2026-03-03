@@ -14,7 +14,7 @@ echo.
 REM 检查必要文件是否存在
 if not exist "update_readme.py" (
     echo ❌ 错误：未找到 update_readme.py 文件
-    echo 💡 请确保在正确的目录下运行此脚本
+    echo - 请确保在正确的目录下运行此脚本
     echo.
     pause
     exit /b 1
@@ -22,7 +22,7 @@ if not exist "update_readme.py" (
 
 if not exist "docs" (
     echo ❌ 错误：未找到 docs 目录
-    echo 💡 请确保在项目根目录下运行此脚本
+    echo - 请确保在项目根目录下运行此脚本
     echo.
     pause
     exit /b 1
@@ -59,7 +59,7 @@ if !errorlevel! equ 0 (
     ) else (
         echo ❌ 未找到Python安装，请检查Python是否已安装
         echo.
-        echo 💡 请确保Python已安装并：
+        echo - 请确保Python已安装并：
         echo    1. 添加到系统PATH中，或
         echo    2. 安装在以下路径之一：
         echo       - C:\Python312\
@@ -77,7 +77,7 @@ echo 📍 使用Python: %PYTHON_CMD%
 echo.
 
 REM 检查Python是否能正常运行
-echo [*] 测试Python环境...
+echo [*] 测试 Python 环境...
 %PYTHON_CMD% --version
 if %errorlevel% neq 0 (
     echo ❌ Python无法正常运行
@@ -145,7 +145,7 @@ REM 自动模式处理Git操作
 echo 🤔 检测到文件更改，准备Git操作...
 echo.
 echo 🚀 使用自动模式：提交并推送（使用默认提交信息）
-echo 💡 如需其他操作方式，请手动运行相关Git命令
+echo - 如需其他操作方式，请手动运行相关Git命令
 echo.
 
 set CHOICE_RESULT=1
@@ -259,7 +259,7 @@ if %errorlevel% equ 0 (
 
 :skip_git
 echo ⏩ 跳过Git操作
-echo 💡 您可以稍后手动提交和推送更改
+echo - 您可以稍后手动提交和推送更改
 goto end_success
 
 :end_success
@@ -274,14 +274,14 @@ goto end_script
 :end_with_warning
 echo.
 echo ⚠️  操作完成但有警告
-echo 💡 您可以稍后手动推送: git push
+echo - 您可以稍后手动推送: git push
 echo.
 goto end_script
 
 :end_with_error
 echo.
 echo ❌ 操作失败
-echo 💡 请检查错误信息并手动执行Git操作
+echo - 请检查错误信息并手动执行Git操作
 echo.
 goto end_script
 

@@ -90,7 +90,7 @@ run;
     </code></pre>
   </div>
   <div style="width: 48%;">
-    <strong>R中对应用法参考</strong>
+    <strong>R中代码用法参考</strong>
     <pre><code class="language-r">
 new_data <- mydata %>%
   mutate(new_var = old_var * 2, # 创建新变量
@@ -116,6 +116,7 @@ new_data <- mydata %>%
   <div style="width: 48%;">
     <strong>SAS中常见代码</strong>
     <pre><code class="language-sas">
+
 /* 缺失值判断 /
 missing(var)
 
@@ -139,29 +140,28 @@ run;
     </code></pre>
   </div>
   <div style="width: 48%;">
-    <strong>R中对应用法参考</strong>
+    <strong>R中代码用法参考</strong>
     <pre><code class="language-r">
-## 缺失值判断
+
+## 缺失值判断 
 is.na(var) # 注意na是数据为空，但有些情况中字符型数据为""时，不属于NA，判断时需特别注意
 
-## 删除完全重复的行
+## 处理重复值
 deduped <- mydata %>%
-    distinct()  # 或 distinct(.keep_all = TRUE)
+    distinct()  # 或 distinct(.keep_all = TRUE) # 删除完全重复的行
 
-## 删除基于关键变量的重复行
 deduped_by_id <- mydata %>%
-    distinct(id_var, .keep_all = TRUE)
+    distinct(id_var, .keep_all = TRUE) # 删除基于关键变量的重复行
 
-## 查看变量中不重复值
-unique(mydata$vars)
+unique(mydata$vars) # 查看变量中不重复值
 
 ## 数值转换
 converted <- mydata %>%
-mutate(
-num_var = as.numeric(char_var), # 字符转数值
-char_var2 = as.character(num_var), # 数值转字符
-factor_var = as.factor(category_var) # 因子转换
-)
+  mutate(
+    num_var = as.numeric(char_var), # 字符转数值
+    char_var2 = as.character(num_var), # 数值转字符
+    factor_var = as.factor(category_var) # 因子转换
+  )
     </code></pre>
   </div>
 </div>
