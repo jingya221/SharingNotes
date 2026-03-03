@@ -11,6 +11,7 @@
     # bytes_limit：默认为200
     # exclude_vars：默认为空，可添加排除无需处理的变量
 ```
+![alt text](image-30.png)
 
 ## 进行codelist转换：fct_apply_ct
 > 根据spec中填写的CT和codelist，对数据集中变量进行CT转换
@@ -19,10 +20,28 @@
 ```R
     ds_all3 <- fct_apply_ct(domain = Domain, inds = ds_all2,
                          spec_metacore = spec_metacore)
-    # data：传入数据
-    # bytes_limit：默认为200
-    # exclude_vars：默认为空，可添加排除无需处理的变量
+    # domain：赋值为对应domain名
+    # inds：传入数据
+    # spec_metacore：内置变量，无需赋值，会自动从运行环境读取
 ```
+
+### TIPS: 关于如何查看codelist
+
+可通过view(ds_spec$codelist)查看spec，type中能看到两种类型code_decode和permitted_val。当codelist中decode=charcode时，type为permitted_val，不相同时为code_decode，可调用上述函数进行decode_to_code的转换。NA值为spec中需要的CT，但codelist文件并未识别到对应值。
+![alt text](image-41.png)
+
+点击右边的小框框可查看CT包含的具体值。
+
+### TIPS: 当codelist缺失时
+1. 对于在codelist未勾选，但spec中存在的CT，会在运行fct_apply_ct时出现如下警告。
+   ![alt text](image-40.png)
+
+2. 对于type=code_decode的变量，如果codelist中勾选的值缺失或大小写不一致，则无法成功进行转换，只会输出NA值（如下图）。在运行fct_apply_ct时会出现如下警告，需注意辨识。
+   ![alt text](image-39.png)
+   ![alt text](image-34.png)![alt text](image-35.png)
+
+3. 对于type=permitted_val的变量，可使用check_ct_data检查CT中勾选的codelist值和数据集中变量值是否一致。下图为变量中存在codelist中未勾选值时的error输出。
+   ![alt text](image-37.png) 
 
 
 ## 匹配epoch：fct_add_epoch
@@ -72,7 +91,7 @@
 
 ![alt text](image-29.png)
 
-### PS: 如何使用sas读取r中输出的xpt文件
+### TIPS: 关于如何使用sas读取r中输出的xpt文件
 
 ```SAS
 libname xptin xport  "Z:\projects\onc-prj-shr-a1811\sub-csr\shr-a1811-ii-206\20_qc\04_sdtmdata\ds.xpt";
