@@ -433,9 +433,10 @@ openxlsx::write.xlsx(mydata, "/path/to/output.xlsx")
 ```
 
 ### 4. CSV数据
+> {readr}:https://readr.tidyverse.org/
 ```R
 mydata <- read.csv("/path/to/input.csv", header = TRUE, na.strings = c("", "NA")) # base R的读入方法
-mydata <- readxl::read_csv("/path/to/input.csv", col_names = TRUE, na = c("", "NA")) # readr包的读入方法
+mydata <- readr::read_csv("/path/to/input.csv", col_names = TRUE, na = c("", "NA")) # readr包的读入方法
 
 write.csv(mydata, "/path/to/output.csv", row.names = FALSE, na = "") # base R的写出方法，na=""可以将R中的NA写出为空字符串，避免在csv中出现NA字符
 readr::write_csv(mydata, "/path/to/output.csv", na = "") # readr包的写出方法，功能和write.csv类似，速度更快
