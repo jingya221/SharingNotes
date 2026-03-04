@@ -127,6 +127,7 @@ run;
 3. 整理并输出比对结果为v_xx.txt文件
 
 比对文件参考：
+
 ![alt text](image-23.png)
 ![alt text](image-24.png)
 

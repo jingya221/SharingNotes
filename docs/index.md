@@ -21,17 +21,13 @@
 #### [04-常见Rpackage介绍](notes/r-project-guide/04-常见Rpackage介绍)
 > 主要介绍SHR-A1811-206项目中推荐使用到的package及相关function
 
-
-#### [SAS 与 R 数据处理代码对比](notes/r-project-guide/test)
-<div style="display: flex; justify-content: space-...
-
 ---
 
 ## 📊 统计信息
 
 - **指南分类**: 1 个
-- **文档数量**: 5 篇
-- **最近更新**: 2026-03-03
+- **文档数量**: 4 篇
+- **最近更新**: 2026-03-04
 
 ---
 
