@@ -14,15 +14,12 @@
 
 对于单个项目，需要使用ds_spec <- spec_metacore %>% select_dataset(Domain)进行选择，选择后包含以下内容，其中比较常用的用于检查spec的操作为：
 
-1. ds_spec$supp: 查看该domain spec中的supp变量
-
-   ![alt text](image-45.png)
-2. ds_spec$codelist: 查看该domain spec中有CT的变量以及对应的codelist勾选的内容。
-
-   ![alt text](image-46.png)
-3. ds_spec$ds_vars: 查看该domain spec中勾选的变量以及TOC中Keys填写的排序变量和顺序
-
-   ![alt text](image-47.png)
+1. ds_spec$supp: 查看该domain spec中的supp变量 <br>
+   ![alt text](image-45.png) <br>
+2. ds_spec$codelist: 查看该domain spec中有CT的变量以及对应的codelist勾选的内容。<br>
+   ![alt text](image-46.png)<br>
+3. ds_spec$ds_vars: 查看该domain spec中勾选的变量以及TOC中Keys填写的排序变量和顺序<br>
+   ![alt text](image-47.png)<br>
 
 
 
@@ -71,7 +68,7 @@ sort_by_key() ## Sort Rows by Key Sequence
 
 <div style="display: flex; justify-content: space-between; gap: 20px;">
   <div style="width: 38%;">
-    <strong>SAS中常见代码</strong>
+    <strong>SAS</strong>
 
 ```sas
 data new_data;
@@ -97,7 +94,7 @@ run;
 ```
   </div>
   <div style="width: 58%;">
-    <strong>R中代码用法参考</strong>
+    <strong>R</strong>
 
 ```r
 new_data <- mydata %>%
@@ -122,7 +119,7 @@ new_data <- mydata %>%
 
 <div style="display: flex; justify-content: space-between; gap: 20px;">
   <div style="width: 38%;">
-    <strong>SAS中常见代码</strong>
+    <strong>SAS</strong>
 
 ```sas
 /* 缺失值判断 */
@@ -149,7 +146,7 @@ run;
     </code></pre>
   </div>
   <div style="width: 58%;">
-    <strong>R中代码用法参考</strong>
+    <strong>R</strong>
 
 ```r
 ## 缺失值判断 
@@ -229,7 +226,7 @@ wide_data <- long %>%
 
 <div style="display: flex; justify-content: space-between; gap: 20px;">
   <div style="width: 38%;">
-    <strong>SAS中常见代码</strong>
+    <strong>SAS</strong>
 
 ```sas
 data string_ops;
@@ -259,7 +256,7 @@ run;
 ```
   </div>
   <div style="width: 58%;">
-    <strong>R中代码用法参考</strong>
+    <strong>R</strong>
 
 ```R
 mydata %>%
@@ -304,7 +301,7 @@ mydata %>%
 #### 5.1 日期转换
 <div style="display: flex; justify-content: space-between; gap: 20px;">
   <div style="width: 38%;">
-    <strong>SAS中常见代码</strong>
+    <strong>SAS</strong>
 
 ```sas
 data date_ops;
@@ -316,7 +313,7 @@ run;
 ```
   </div>
   <div style="width: 58%;">
-    <strong>R中代码用法参考</strong>
+    <strong>R</strong>
 
 ```R
 mydata <- mydata %>%
@@ -332,7 +329,7 @@ mydata <- mydata %>%
 #### 5.2 日期提取
 <div style="display: flex; justify-content: space-between; gap: 20px;">
   <div style="width: 38%;">
-    <strong>SAS中常见代码</strong>
+    <strong>SAS</strong>
 
 ```sas
 data date_extract;
@@ -346,7 +343,7 @@ run;
 ```
   </div>
   <div style="width: 58%;">
-    <strong>R中代码用法参考</strong>
+    <strong>R</strong>
 
 ```R
 mydata <- mydata %>%
@@ -366,7 +363,7 @@ mydata <- mydata %>%
 #### 5.3 日期计算
 <div style="display: flex; justify-content: space-between; gap: 20px;">
   <div style="width: 38%;">
-    <strong>SAS中常见代码</strong>
+    <strong>SAS</strong>
 
 ```sas
 data date_calc;
@@ -387,7 +384,7 @@ run;
 ```
   </div>
   <div style="width: 58%;">
-    <strong>R中代码用法参考</strong>
+    <strong>R</strong>
 
 ```R
 mydata <- mydata %>%
@@ -534,5 +531,5 @@ https://purrr.tidyverse.org/
 ### admiral: CDISC数据处理包，包含很多针对CDISC数据处理的function
 https://pharmaverse.github.io/admiral/cran-release/index.html
 
-#### TLG catalog：包含大多数的图表制作方法和代码，后续出具TFL时可以参考
+### TLG catalog：包含大多数的图表制作方法和代码，后续出具TFL时可以参考
 https://insightsengineering.github.io/tlg-catalog/stable/
