@@ -13,6 +13,18 @@
 ```
 ![alt text](image-30.png)
 
+## 匹配epoch：fct_add_epoch
+> 匹配epoch，需具备变量XXSEQ
+
+调用案例：
+```R
+    ds_final <- fct_add_epoch(ds_all4, se_ds = sdtmqc$se, compdtc = "DSSTDTC")
+    # data：传入数据
+    # se_ds：默认为qc侧SE，可修改se_ds = sdtmprt$se
+    # compdtc：数据集判断epoch基于的日期变量
+    # seqname：默认为当前Domain的SEQ变量名，如不存在则无法进行后续匹配处理
+```
+
 ## 进行codelist转换：fct_apply_ct
 > 根据spec中填写的CT和codelist，对数据集中变量进行CT转换
 
@@ -42,19 +54,6 @@
 
 3. 对于type=permitted_val的变量，可使用check_ct_data检查CT中勾选的codelist值和数据集中变量值是否一致。下图为变量中存在codelist中未勾选值时的error输出。
    ![alt text](image-37.png) 
-
-
-## 匹配epoch：fct_add_epoch
-> 匹配epoch，需具备变量XXSEQ
-
-调用案例：
-```R
-    ds_final <- fct_add_epoch(ds_all4, se_ds = sdtmqc$se, compdtc = "DSSTDTC")
-    # data：传入数据
-    # se_ds：默认为qc侧SE，可修改se_ds = sdtmprt$se
-    # compdtc：数据集判断epoch基于的日期变量
-    # seqname：默认为当前Domain的SEQ变量名，如不存在则无法进行后续匹配处理
-```
 
 ## 结果输出：fct_final_output2xpt
 > 用于输出domain数据至xpt文件

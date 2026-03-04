@@ -17,11 +17,9 @@
 1. ds_spec$supp: 查看该domain spec中的supp变量
 
    ![alt text](image-45.png)
-
 2. ds_spec$codelist: 查看该domain spec中有CT的变量以及对应的codelist勾选的内容。
 
    ![alt text](image-46.png)
-
 3. ds_spec$ds_vars: 查看该domain spec中勾选的变量以及TOC中Keys填写的排序变量和顺序
 
    ![alt text](image-47.png)
@@ -62,10 +60,10 @@ sort_by_key() ## Sort Rows by Key Sequence
 
 ## 数据处理：dplyr, tidyr, stringr, lubridate
 
-> {dplyr}:https://dplyr.tidyverse.org/
-> {tidyr}:https://tidyr.tidyverse.org/
-> {stringr}:https://stringr.tidyverse.org/
-> {lubridate}:https://lubridate.tidyverse.org/
+> {dplyr}:https://dplyr.tidyverse.org/ <br>
+> {tidyr}:https://tidyr.tidyverse.org/ <br>
+> {stringr}:https://stringr.tidyverse.org/ <br>
+> {lubridate}:https://lubridate.tidyverse.org/ <br>
 
 ### 1. 数据处理
 
