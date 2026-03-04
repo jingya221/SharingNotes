@@ -188,7 +188,7 @@ left_joined <- left_join(data1, data2, by = "key_var")
 right_joined <- right_join(data1, data2, by = "key_var")
 full_joined <- full_join(data1, data2, by = "key_var")
 
-## 纵向合并
+## 纵向合并，类似set操作
 appended <- bind_rows(data1, data2, data3)
 
 ## 数据转置（用到tidyr包）
@@ -216,22 +216,23 @@ wide_data <- long %>%
 data string_ops;
   set mydata;
   len = length(string_var);  /* 字符长度 */
-  first_3 = substr(string_var, 1, 3);  / 提取前3个字符 */
-  pos = index(string_var, "search_text"); / 查找位置 */
+  first_3 = substr(string_var, 1, 3);  /* 提取前3个字符 */
+  pos = index(string_var, "search_text"); /* 查找位置 */
   new_str = tranwrd(string_var, "old", "new"); /* 替换 */
+  new_str2 = scan(string_var, 1, ","); /* 提取逗号前内容 */
 
-  upper_str = upcase(string_var);  / 转大写 /
-  lower_str = lowcase(string_var);  / 转小写 /
-  proper_str = propcase(string_var);  / 首字母大写 */
+  upper_str = upcase(string_var);  /* 转大写 */
+  lower_str = lowcase(string_var);  /* 转小写 */
+  proper_str = propcase(string_var);  /* 首字母大写 */
 
-  left_trim = left(string_var);  / 去除左侧空格 /
-  right_trim = right(string_var);  / 去除右侧空格 /
-  both_trim = strip(string_var);  / 去除两侧空格 */
+  left_trim = left(string_var);  /* 去除左侧空格 */
+  right_trim = right(string_var);  /* 去除右侧空格 */
+  both_trim = strip(string_var);  /* 去除两侧空格 */
 
-  full_name = cat(first_name, " ", last_name);  / 连接字符串 /
-  full_name2 = catx(" ", first_name, last_name);  / 自动处理分隔符 */
+  full_name = cat(first_name, " ", last_name);  /* 连接字符串 */
+  full_name2 = catx(" ", first_name, last_name);  /* 自动处理分隔符 */
 
-  / 分割字符串 */
+  /* 分割字符串 */
   length part1 part2 part3 $50;
   part1 = scan(string_var, 1, ",");
   part2 = scan(string_var, 2, ",");
@@ -252,6 +253,7 @@ mydata %>%
          pos = str_locate(string_var, "search_text")[, "start"], # 查找位置
          has_pattern = str_detect(string_var, "pattern"), # 检测是否包含模式
          extracted = str_extract(string_var, "[0-9]+"), # 提取匹配内容
+         new_str = str_split_i(string_var, ",", i = 1), # 提取逗号前内容
          
          new_str = str_replace_all(string_var, "old", "new"), # 替换（所有出现）
          new_str_first = str_replace(string_var, "old", "new"), # 替换（只针对第一次出现）
