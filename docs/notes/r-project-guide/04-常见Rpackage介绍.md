@@ -7,22 +7,6 @@
 ### {metacore}设置并读取spec和codelist
 > {metacore}：https://atorus-research.github.io/metacore/
 
-具体如何读取部门spec和设置成metacore格式，请参考上述package说明网页，下面主要介绍如何使用已建好的spec_metacore。
-
-本项目中包含的spec_metacore内容：
-![alt text](image-43.png)
-
-对于单个项目，需要使用ds_spec <- spec_metacore %>% select_dataset(Domain)进行选择，选择后包含以下内容，其中比较常用的用于检查spec的操作为：
-
-1. ds_spec$supp: 查看该domain spec中的supp变量 <br>
-   ![alt text](image-45.png) <br>
-2. ds_spec$codelist: 查看该domain spec中有CT的变量以及对应的codelist勾选的内容。<br>
-   ![alt text](image-46.png)<br>
-3. ds_spec$ds_vars: 查看该domain spec中勾选的变量以及TOC中Keys填写的排序变量和顺序<br>
-   ![alt text](image-47.png)<br>
-
-
-
 ### {metatools}调用spec
 
 > {metatools}：https://pharmaverse.github.io/metatools/
