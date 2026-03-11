@@ -2,6 +2,22 @@
 
 > 主要介绍SHR-A1811-206项目中推荐使用到的package及相关function
 
+## 安装R包
+
+```R
+## 常用方法&在本地电脑方法
+install.packages("dplyr")
+
+## 远程桌面方法（无法联网，只能从指定路径安装）
+options(repos = c(CRAN = "https://nexus.hengrui.com/repository/r-proxy-cran/"))
+install.packages("dplyr")
+
+## 本地下载包安装方式
+install.packages("C:/Users/wangjy35/Downloads/renv_1.1.8.tar.gz")
+```
+
+
+
 ## spec相关：metacore, metatools
 
 ### {metacore}设置并读取spec和codelist
