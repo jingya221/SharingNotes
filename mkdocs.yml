@@ -105,3 +105,5 @@ nav:
     - 02-R程序常见用法: notes/r-project-guide/02-R程序常见用法.md
     - 03-内置funcion介绍: notes/r-project-guide/03-内置funcion介绍.md
     - 04-常见Rpackage介绍: notes/r-project-guide/04-常见Rpackage介绍.md
+- 项目Timeline: timeline.md
+
