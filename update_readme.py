@@ -183,12 +183,20 @@ def update_mkdocs_nav(markdown_files):
                 category_nav.append({file_info['title']: f"notes/{page_path}"})
             nav_notes.append({category: category_nav})
     
-    # 创建完整的导航结构
+    # 从旧 nav 中保留自动生成项之外的自定义条目（如 Timeline）
+    auto_keys = {'首页', '笔记分类'}
+    old_nav = config.get('nav', [])
+    custom_nav_items = [
+        item for item in old_nav
+        if isinstance(item, dict) and not any(k in auto_keys for k in item.keys())
+    ]
+
+    # 创建完整的导航结构，自动项在前，自定义项保留在后
     new_nav = [
         {'首页': 'index.md'},
-        {'笔记分类': nav_notes}
-    ]
-    
+        {'笔记分类': nav_notes},
+    ] + custom_nav_items
+
     # 直接替换整个导航配置
     config['nav'] = new_nav
     
