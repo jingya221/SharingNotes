@@ -25,6 +25,22 @@
     # seqname：默认为当前Domain的SEQ变量名，如不存在则无法进行后续匹配处理
 ```
 
+## 排序并添加序号：fct_sort_addseq
+> 基于spec（metacore）中定义的key_seq进行排序；可选是否按SAS风格将NA排在前面，并可自动添加当前domain的`--SEQ`变量。
+
+调用案例：
+```R
+    ds_all4 <- fct_sort_addseq(ds_all3, na.last = FALSE, add_seq = TRUE,
+                                spec_metacore = spec_metacore, domain = Domain)
+    # inds：传入数据
+    # na.last：默认为T，表示NA值排最后；如设为F，则按SAS风格将NA排前面
+    # add_seq：默认为F；如设为T，则自动新增对应domain的SEQ变量，如AESEQ、DSSEQ
+    # spec_metacore：内置变量，无需赋值，会自动从运行环境读取；也可手动传入
+    # domain：默认从环境变量Domain中获取，如不存在请提供具体值
+```
+
+**注意事项：**在R中使用arrange排序时，NA值默认排在最后；sort排序可通过na.last参数控制NA值位置。该函数基于类似逻辑，调整NA排序位置，以满足和SAS一致的输出需求。
+
 ## 进行codelist转换：fct_apply_ct
 > 根据spec中填写的CT和codelist，对数据集中变量进行CT转换
 
