@@ -10,6 +10,12 @@
 
 ## 📚 指南内容
 
+### 🗂️ Rcourse
+
+#### [R 课程 Slides](docs/notes/Rcourse/index.md)
+本节收录 R 语言课程的课件，使用 [xaringan](https://github.com/yi...
+
+
 ### 🗂️ r-project-guide
 
 #### [01-R项目结构](docs/notes/r-project-guide/01-R项目结构.md)
@@ -31,9 +37,9 @@
 
 ## 📊 统计信息
 
-- **指南分类**: 1 个
-- **文档数量**: 4 篇
-- **最近更新**: 2026-03-30
+- **指南分类**: 2 个
+- **文档数量**: 5 篇
+- **最近更新**: 2026-04-10
 
 ---
 
@@ -78,7 +84,7 @@ SharingNotes/
 
 ---
 
-*📅 最后更新: 2026-03-30*
+*📅 最后更新: 2026-04-10*
 
 <p align="center">
   © 2026 Jingya Wang | <a href="https://github.com/jingya221/SharingNotes">GitHub</a>
