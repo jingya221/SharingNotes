@@ -1,0 +1,1454 @@
+---
+title: "第五章：临床汇总表的计算与输出"
+subtitle: "base R · rtables · tern · r2rtf · survival"
+author: "王靖雅"
+date: "2026-05-15"
+output:
+  xaringan::moon_reader:
+    css: [default, Chap5-slides.css]
+    lib_dir: libs
+    nature:
+      highlightStyle: atom-one-dark
+      highlightLines: true
+      countIncrementalSlides: false
+      ratio: "16:9"
+      slideNumberFormat: |
+        <div class="progress-bar-container">
+          <div class="progress-bar" style="width: calc(%current% / %total% * 100%);"></div>
+        </div>
+---
+
+```{r setup, include=FALSE}
+options(htmltools.dir.version = FALSE,
+        tibble.print_max = 5,
+        tibble.print_min = 5,
+        tibble.width     = 65)
+knitr::opts_chunk$set(
+  fig.width = 8, fig.height = 3.5, fig.retina = 2,
+  out.width = "100%",
+  cache = FALSE,
+  echo = TRUE,
+  message = FALSE,
+  warning = FALSE,
+  comment = ""
+)
+
+library(dplyr)
+
+# 课堂演示数据集 ----
+adsl <- tibble::tibble(
+  USUBJID = sprintf("SUBJ%03d", 1:16),
+  ARM = rep(c("Treatment A", "Treatment B"), each = 8),
+  AGE = c(61,67,59,72,64,55,69,63,58,62,70,66,54,73,68,60),
+  SEX = c("Male","Female","Male","Male","Female","Female","Male","Female",
+          "Female","Male","Male","Female","Female","Male","Female","Male"),
+  RACE = c("Asian","Asian","White","Asian","White","Asian","Other","White",
+           "Asian","White","White","Asian","Asian","Other","White","Asian"),
+  ETHNIC = c("Not Hispanic or Latino","Not Hispanic or Latino",
+             "Hispanic or Latino","Not Hispanic or Latino",
+             "Not Hispanic or Latino","Hispanic or Latino",
+             "Not Hispanic or Latino","Not Hispanic or Latino",
+             "Not Hispanic or Latino","Not Hispanic or Latino",
+             "Hispanic or Latino","Not Hispanic or Latino",
+             "Not Hispanic or Latino","Hispanic or Latino",
+             "Not Hispanic or Latino","Not Hispanic or Latino"),
+  AVAL = c(14.2,10.8,16.4,8.1,12.5,18.0,7.4,13.1,
+           15.0,11.2,9.5,12.0,17.2,6.8,10.4,14.8),
+  CNSR = c(0,1,0,1,0,0,1,0,1,0,0,1,0,1,0,0)
+) %>%
+  mutate(
+    AGEGR1   = if_else(AGE <= 65, "<=65", ">65"),
+    is_event = CNSR == 0
+  )
+```
+
+```{r xaringan-extra, echo=FALSE}
+xaringanExtra::use_panelset()
+xaringanExtra::use_tile_view()
+xaringanExtra::use_clipboard()
+xaringanExtra::use_animate_css()
+xaringanExtra::use_scribble()
+xaringanExtra::use_progress_bar(color = "#2d6a9f", location = "bottom")
+```
+
+---
+name: title
+class: inverse, center, middle, animated, fadeIn
+
+# 第五章
+## 临床汇总表的计算与输出
+
+### base R · rtables · tern · r2rtf · survival
+
+**讲师：Jingya Wang**
+
+.footnote[配套大纲：`syllabus.md` 第五章 | 60 分钟]
+
+.section-num[5]
+
+---
+name: toc
+class: animated, fadeIn
+
+# 目录
+
+.pull-left[
+.toc-item[.toc-num[§ 0] [从一个 Table Shell 开始](#sec0)]
+.toc-item[.toc-num[§ 1] [统计量基础 & 分母约定](#sec1)]
+.toc-item[.toc-num[§ 2] [base R 出表](#sec2)]
+.toc-item[.toc-num[§ 3] [rtables / tern 出表](#sec3)]
+]
+
+.pull-right[
+.toc-item[.toc-num[§ 4] [表格输出方式总览](#sec4)]
+.toc-item[.toc-num[§ 5] [Survival Analysis 入口](#sec5)]
+.toc-item[.toc-num[★] [课后练习](#homework)]
+]
+
+.footnote[按 `O` 键鸟瞰所有幻灯片 &ensp;| 按 `←→` 键导航]
+
+---
+class: animated, fadeIn
+
+# 本章逻辑
+
+.pull-left[
+### 讲课主线
+
+1. **Table Shell**：先给出目标，明确要算什么
+2. **计算规则**：连续变量 vs 分类变量
+3. **base R 实现**：理解底层算法
+4. **rtables + tern 实现**：建立临床标准化表格思维
+5. **输出**：RTF · Excel · Word/DOCX
+6. **Survival Analysis**：时间事件分析的表格入口
+]
+
+.pull-right[
+### 参考资料
+
+| 包 | 文档 |
+|---|---|
+| rtables | [insightsengineering.github.io/rtables](https://insightsengineering.github.io/rtables/latest-release/) |
+| tern | [insightsengineering.github.io/tern](https://insightsengineering.github.io/tern/latest-tag/) |
+| formatters | [export_as_rtf](https://insightsengineering.github.io/formatters/latest-tag/reference/export_as_rtf.html) |
+| r2rtf | CRAN 文档 |
+| openxlsx | [ycphs.github.io/openxlsx](https://ycphs.github.io/openxlsx/) |
+| survival | R 自带推荐包 |
+]
+
+---
+
+name: sec0
+class: inverse, center, middle, animated, fadeIn
+
+# § 0
+# 从一个 Table Shell 开始
+
+.section-num[0]
+
+.footnote[[↑ 返回目录](#toc)]
+
+---
+class: animated, fadeIn
+
+# 0.1 这张表到底在表达什么
+
+.pull-left[
+### 典型 Demographics Table Shell
+
+```
+Table 14.1.2.1.1 Demographics (FAS)
+
+                    Treatment A    Treatment B
+                     (N=xx)         (N=xx)
+
+Age (year)
+  n                    xx             xx
+  Mean                 xx.x           xx.x
+  S.D.                 xx.xx          xx.xx
+  Median               xx.x           xx.x
+  Q1, Q3               xx.x, xx.x     xx.x, xx.x
+  Min, Max             xx, xx         xx, xx
+
+Age group (year), n (%)
+  <= 65                xx (xx.x)      xx (xx.x)
+  > 65                 xx (xx.x)      xx (xx.x)
+
+Sex, n (%)
+  Male                 xx (xx.x)      xx (xx.x)
+  Female               xx (xx.x)      xx (xx.x)
+```
+]
+
+.pull-right[
+### 两大变量类型
+
+.green-box[
+**① 连续变量**  
+`AGE`、`WEIGHT`、`BMI`  
+→ n · Mean · SD · Median · Q1/Q3 · Min/Max
+]
+
+.tip-box[
+**② 分类变量**  
+`AGEGR1`、`SEX`、`RACE`、`ETHNIC`  
+→ n (%) 按 level 展开
+]
+
+.note-box[
+核心不是"画表"，而是：**按列分组，对变量做规则化汇总**
+]
+]
+
+---
+name: sec1
+class: inverse, center, middle, animated, fadeIn
+
+# § 1
+# 统计量基础 & 分母约定
+
+.section-num[1]
+
+.footnote[[↑ 返回目录](#toc)]
+
+---
+class: animated, fadeIn
+
+# 1.1 常见统计量与 R 函数对照
+
+| 行标签 | 含义 | 常见 R 函数 |
+|---|---|---|
+| `n` | 非缺失样本数 | `sum(!is.na(x))` |
+| `Mean` | 均值 | `mean(x, na.rm = TRUE)` |
+| `S.D.` | 标准差 | `sd(x, na.rm = TRUE)` |
+| `Median` | 中位数 | `median(x, na.rm = TRUE)` |
+| `Q1, Q3` | 25% / 75% 分位数 | `quantile(x, probs = c(0.25, 0.75), na.rm = TRUE)` |
+| `Min, Max` | 最小值与最大值 | `range(x, na.rm = TRUE)` |
+| `n (%)` | 频数和百分比 | `table()` + `prop.table()` |
+
+.warn-box[
+**`sd()` 边界情况**：某组只有 1 个非缺失值时，`sd()` 返回 `NA`，这是统计上的正常行为，不是 bug。
+
+**`quantile()` 算法**：默认 `type = 7`，如果 SAP 有固定口径（如 SAS 的 `PCTLDEF=5`），必须显式指定 `type`。
+]
+
+---
+class: animated, fadeIn
+
+# 1.2 两个分母问题——临床表最易出错的地方
+
+.pull-left[
+### 连续变量的分母
+
+- `n` = 当前组该变量的**非缺失人数**
+- 其他统计量也在非缺失值上计算
+
+```r
+x <- c(61, 67, NA, 72, 64)
+sum(!is.na(x))   # n = 4，不是 5
+mean(x, na.rm = TRUE)
+```
+]
+
+.pull-right[
+### 分类变量的分母
+
+- `n` = 该 level 的人数
+- `%` 的分母 = **当前 treatment group 的列总人数 N**
+
+```r
+# 百分比用列分母 N，不是 level 总和
+count / N_col * 100
+```
+
+.warn-box[
+SAP 另有规定时以 SAP 为准。最常见的 Demographics 表使用**列分母 `N_col`**，不是变量非缺失人数。
+]
+]
+
+---
+class: animated, fadeIn
+
+# 1.3 课堂演示数据集
+
+```{r eval=FALSE}
+library(dplyr)
+
+adsl <- tibble::tibble(
+  USUBJID = sprintf("SUBJ%03d", 1:16),
+  ARM     = rep(c("Treatment A", "Treatment B"), each = 8),
+  AGE     = c(61, 67, 59, 72, 64, 55, 69, 63,
+              58, 62, 70, 66, 54, 73, 68, 60),
+  SEX     = c("Male","Female","Male","Male","Female","Female","Male","Female",
+              "Female","Male","Male","Female","Female","Male","Female","Male"),
+  RACE    = c("Asian","Asian","White","Asian","White","Asian","Other","White",
+              "Asian","White","White","Asian","Asian","Other","White","Asian"),
+  AVAL    = c(14.2,10.8,16.4,8.1,12.5,18.0,7.4,13.1,
+              15.0,11.2,9.5,12.0,17.2,6.8,10.4,14.8),
+  CNSR    = c(0,1,0,1,0,0,1,0,1,0,0,1,0,1,0,0)
+) %>%
+  mutate(
+    AGEGR1   = if_else(AGE <= 65, "<=65", ">65"),  #<<
+    is_event = CNSR == 0                            #<<
+  )
+```
+
+.pull-left[
+.note-box[`ARM`：列分组变量 | `AGE`：连续变量 | `AGEGR1/SEX/RACE/ETHNIC`：分类变量]
+]
+.pull-right[
+.tip-box[`AVAL` + `is_event`：用于后面 survival analysis 入口示例]
+]
+
+---
+
+name: sec2
+class: inverse, center, middle, animated, fadeIn
+
+# § 2
+# 使用 base R 出表
+
+.section-num[2]
+
+.footnote[[↑ 返回目录](#toc)]
+
+---
+class: animated, fadeIn
+
+# 2.1 base R 的三件事
+
+.pull-left[
+### 核心目标
+
+base R 的重点不是"写得最短"，而是理解：
+
+1. **如何拆组**
+2. **如何对每组做统计**
+3. **如何把多个统计结果拼成一张表**
+
+### 常用函数速查
+
+| 函数 | 用途 |
+|---|---|
+| `split()` | 按分组拆数据为列表 |
+| `lapply()` | 对每组重复计算 |
+| `tapply()` | 单统计量分组汇总 |
+| `table()` | 频数统计 |
+| `prop.table()` | 比例统计 |
+| `quantile()` | 计算分位数 |
+]
+
+.pull-right[
+### 与 tidyverse 的关系
+
+| 维度 | base R | tidyverse |
+|---|---|---|
+| 学习价值 | 理解底层算法 | 工程效率更高 |
+| 透明度 | 高 | 中 |
+| 临床表复用 | 一般 | 配合 rtables 更强 |
+
+.green-box[
+**教学顺序：先 base R → 再 rtables/tern**  
+先知道每一行怎么算，才不会变成"只会抄模板"
+]
+]
+
+---
+class: animated, fadeIn
+
+# 2.2 连续变量汇总函数
+
+.pull-left[
+### 定义通用统计函数
+
+```{r}
+cont_stats <- function(x) {
+  q <- quantile(x, probs = c(0.25, 0.75),
+                na.rm = TRUE, names = FALSE)
+  r <- range(x, na.rm = TRUE)
+
+  list(
+    n      = sum(!is.na(x)),
+    mean   = mean(x, na.rm = TRUE),
+    sd     = sd(x, na.rm = TRUE),
+    median = median(x, na.rm = TRUE),
+    q1     = q[1],
+    q3     = q[2],
+    min    = r[1],
+    max    = r[2]
+  )
+}
+
+cont_stats(adsl$AGE)
+```
+]
+
+.pull-right[
+### 两个高频易错点
+
+```{r}
+# 只有 1 个值时，sd() 返回 NA（正常）
+sd(c(5))
+```
+
+```{r}
+# 默认 type=7，如需 SAS 口径可指定
+quantile(adsl$AGE,
+         probs = c(0.25, 0.75),
+         type  = 7)
+```
+
+.warn-box[
+如果 SAP 指定分位数算法（如 SAS PCTLDEF=5），  
+必须在 `quantile()` 里显式写 `type = 2`
+]
+]
+
+---
+class: animated, fadeIn
+
+# 2.3 `split()` + `lapply()` 按组计算
+
+.panelset[
+.panel[.panel-name[split + lapply]
+```{r}
+# split：把 AGE 按 ARM 拆成列表
+age_by_arm <- split(adsl$AGE, adsl$ARM)
+
+# lapply：对每组重复调用 cont_stats
+age_summary <- lapply(age_by_arm, cont_stats)
+str(age_summary, max.level = 2)
+```
+.tip-box[`split()` 先按组拆分，`lapply()` 对每组重复相同计算——这是最直观的分组分析入口。]
+]
+.panel[.panel-name[tapply 单统计量]
+```{r}
+# tapply 适合"一个统计量一行"的需求
+tapply(adsl$AGE, adsl$ARM, mean, na.rm = TRUE)
+```
+```{r}
+tapply(adsl$AGE, adsl$ARM, median, na.rm = TRUE)
+```
+```{r}
+tapply(adsl$AGE, adsl$ARM,
+       function(x) quantile(x, 0.25, na.rm = TRUE))
+```
+.note-box[需要多个统计量时，`split()` + `lapply()` 更自然；只要一个统计量时，`tapply()` 更简洁。]
+]
+.panel[.panel-name[格式化为表格文本]
+```{r}
+fmt_num  <- function(x, d=1) ifelse(is.na(x), "NA",
+              formatC(x, format="f", digits=d))
+fmt_pair <- function(x, y, d=1, sep=", ")
+              paste0(fmt_num(x,d), sep, fmt_num(y,d))
+
+cont_stats_to_rows <- function(x) {
+  s <- cont_stats(x)
+  c("n"        = as.character(s$n),
+    "Mean"     = fmt_num(s$mean, 1),
+    "S.D."     = fmt_num(s$sd,   2),
+    "Median"   = fmt_num(s$median, 1),
+    "Q1, Q3"   = fmt_pair(s$q1, s$q3, 1),
+    "Min, Max" = fmt_pair(s$min, s$max, 0))
+}
+
+lapply(age_by_arm, cont_stats_to_rows)
+```
+]
+]
+
+---
+class: animated, fadeIn
+
+# 2.4 分类变量：`table()` & `prop.table()`
+
+.panelset[
+.panel[.panel-name[频数表]
+```{r}
+# 单变量频数
+table(adsl$SEX)
+```
+```{r}
+# 二维交叉表
+table(adsl$ARM, adsl$SEX)
+```
+]
+.panel[.panel-name[比例表]
+```{r}
+# margin=1：按行求比例（行是 ARM，列是 SEX）
+prop.table(table(adsl$ARM, adsl$SEX), margin = 1)
+```
+.warn-box[
+`margin = 1` 按行（ARM）计算比例；`margin = 2` 按列计算比例；不写 `margin` 则按总体计算。  
+临床表通常用 `margin = 1`（每个 ARM 组的人数作分母）。
+]
+]
+.panel[.panel-name[n (%) 格式化]
+```{r}
+fmt_n_pct <- function(count, denom, digits = 1) {
+  pct <- ifelse(denom == 0, NA_real_, 100 * count / denom)
+  paste0(count, " (",
+         formatC(pct, format = "f", digits = digits), ")")
+}
+
+# 演示
+fmt_n_pct(5, 8)   # 5/8 = 62.5%
+```
+]
+.panel[.panel-name[分类变量整体汇总]
+```{r}
+cat_summary <- function(data, var, arm_var = "ARM") {
+  tab   <- table(data[[arm_var]], data[[var]])
+  denom <- rowSums(tab)
+  out   <- as.data.frame.matrix(tab)
+  for (lv in names(out))
+    out[[lv]] <- mapply(fmt_n_pct, out[[lv]], denom)
+  t(out)
+}
+
+cat_summary(adsl, "SEX")
+```
+]
+]
+
+---
+class: animated, fadeIn
+
+# 2.5 拼成完整 Demographics Table
+
+.panelset[
+.panel[.panel-name[列头]
+```{r}
+col_n       <- table(adsl$ARM)
+col_headers <- paste0(names(col_n), " (N=",
+                      as.integer(col_n), ")")
+col_headers
+```
+]
+.panel[.panel-name[连续变量 section]
+```{r}
+build_cont_section <- function(data, var, label,
+                               arm_var = "ARM") {
+  xs         <- split(data[[var]], data[[arm_var]])
+  stats_list <- lapply(xs, cont_stats_to_rows)
+  stat_names <- names(stats_list[[1]])
+  out <- data.frame(
+    row_label = c(label, paste0("  ", stat_names)),
+    stringsAsFactors = FALSE
+  )
+  for (arm in names(stats_list))
+    out[[arm]] <- c("", unname(stats_list[[arm]]))
+  out
+}
+
+age_section <- build_cont_section(adsl, "AGE", "Age (year)")
+age_section
+```
+]
+.panel[.panel-name[分类变量 section]
+```{r}
+build_cat_section <- function(data, var, label,
+                              arm_var = "ARM") {
+  tab        <- table(data[[arm_var]], data[[var]])
+  denom      <- rowSums(tab)
+  levels_var <- colnames(tab)
+  out <- data.frame(
+    row_label = c(label, paste0("  ", levels_var)),
+    stringsAsFactors = FALSE
+  )
+  for (i in seq_len(nrow(tab))) {
+    arm_name    <- rownames(tab)[i]
+    values      <- mapply(fmt_n_pct, tab[i,], denom[i])
+    out[[arm_name]] <- c("", unname(values))
+  }
+  out
+}
+
+sex_section  <- build_cat_section(adsl, "SEX",    "Sex, n (%)")
+race_section <- build_cat_section(adsl, "RACE",   "Race, n (%)")
+agegr_section<- build_cat_section(adsl, "AGEGR1", "Age group, n (%)")
+```
+]
+.panel[.panel-name[合并输出]
+```{r}
+demo_table_base <- rbind(age_section, agegr_section,
+                         sex_section, race_section)
+names(demo_table_base)[-1] <- col_headers
+demo_table_base
+```
+.green-box[
+**base R 优点**：完全透明、可高度定制、适合教学和调试  
+**base R 缺点**：缩进/分页/版式能力弱，复用性一般
+]
+]
+]
+
+---
+
+name: sec3
+class: inverse, center, middle, animated, fadeIn
+
+# § 3
+# 使用 rtables / tern 出表
+
+.section-num[3]
+
+.footnote[[↑ 返回目录](#toc)]
+
+---
+class: animated, fadeIn
+
+# 3.1 rtables 的核心思想
+
+.pull-left[
+### 表格引擎三步走
+
+```
+① 定义布局 layout
+      ↓
+② 把数据填进布局
+      ↓
+③ 生成可打印 / HTML / RTF 的表对象
+```
+
+### 关键函数
+
+| 函数 | 作用 |
+|---|---|
+| `basic_table()` | 初始化布局 |
+| `split_cols_by()` | 按列变量拆分列头 |
+| `split_rows_by()` | 按行变量生成层级 |
+| `analyze()` | 对变量应用分析函数 |
+| `build_table()` | 把数据填进布局 |
+]
+
+.pull-right[
+### 最小骨架
+
+```{r eval=FALSE}
+library(rtables)
+
+lyt <- basic_table(show_colcounts = TRUE) %>%
+  split_cols_by("ARM")
+
+tbl <- build_table(lyt, df = adsl)
+tbl
+```
+
+.tip-box[
+`rtables` 负责**表格结构和布局**  
+`formatters` 负责**单元格内容怎么显示**  
+`tern` 负责**常见临床统计分析函数**
+]
+
+.note-box[
+与 base R 的区别：  
+- base R：先算成对象，再自己拼表  
+- rtables：边描述布局，边描述每个区域怎么计算
+]
+]
+
+---
+class: animated, fadeIn
+
+# 3.2 `formatters` 简介
+
+.pull-left[
+### 它做什么
+
+1. 把值格式化为显示文本
+2. 为 rtables 对象提供 ASCII 渲染能力
+
+### 三个核心概念
+
+**① `rcell()`** — 构造一个表格单元格
+
+```{r eval=FALSE}
+library(formatters)
+rcell(12.345, format = "xx.x")
+rcell(c(10.2, 18.6), format = "xx.x, xx.x")
+```
+
+**② `in_rows()`** — 把多条统计量打包成多行
+
+**③ 格式标签 `format = "..."`**
+
+| 格式标签 | 含义 |
+|---|---|
+| `"xx.x"` | 保留 1 位小数 |
+| `"xx.xx"` | 保留 2 位小数 |
+| `"xx (xx.x%)"` | 频数 + 百分比 |
+| `"xx.x, xx.x"` | 两值并列 |
+]
+
+.pull-right[
+### 格式化验证
+
+```{r eval=FALSE}
+formatters::format_value(5.1235,
+                         format = "xx.xx")
+
+formatters::format_value(c(1.2355, 2.6789),
+                         format = "(xx.xx, xx.xx)")
+```
+
+.tip-box[
+- base R 出表：格式化靠 `paste()` / `sprintf()` / `formatC()`
+- rtables 工作流：格式化交给 `formatters`
+]
+
+.green-box[
+`formatters` = rtables 的"显示层工具箱"  
+很多 rtables 表格的显示效果，本质上就是 `formatters` 在做值的渲染
+]
+]
+
+---
+class: animated, fadeIn
+
+# 3.3 自定义连续变量分析函数
+
+```{r eval=FALSE}
+library(rtables)
+library(formatters)
+
+cont_afun <- function(x, .N_col, ...) {
+  q <- quantile(x, probs = c(0.25, 0.75), na.rm = TRUE, names = FALSE)
+  r <- range(x, na.rm = TRUE)
+
+  in_rows(
+    "n"        = rcell(sum(!is.na(x)),           format = "xx"),
+    "Mean"     = rcell(mean(x, na.rm = TRUE),     format = "xx.x"),
+    "S.D."     = rcell(sd(x, na.rm = TRUE),       format = "xx.xx"),
+    "Median"   = rcell(median(x, na.rm = TRUE),   format = "xx.x"),
+    "Q1, Q3"   = rcell(q,                         format = "xx.x, xx.x"),
+    "Min, Max" = rcell(r,                          format = "xx, xx")
+  )
+}
+
+lyt_age <- basic_table(show_colcounts = TRUE) %>%
+  split_cols_by("ARM") %>%
+  analyze("AGE", afun = cont_afun, var_labels = "Age (year)")  #<<
+
+tbl_age <- build_table(lyt_age, adsl)
+tbl_age
+```
+
+.note-box[`afun` = 给变量的分析函数；`in_rows()` = 返回多行；`rcell()` = 单元格内容 + 显示格式]
+
+---
+class: animated, fadeIn
+
+# 3.4 tern：`analyze_vars()` 连续变量
+
+```{r eval=FALSE}
+library(tern)
+
+lyt_tern_cont <- basic_table(show_colcounts = TRUE) %>%
+  split_cols_by("ARM") %>%
+  analyze_vars(
+    vars    = "AGE",
+    .stats  = c("n", "mean_sd", "median",
+                "quantiles", "range"),                 #<<
+    .labels = c(
+      n          = "n",
+      mean_sd    = "Mean (SD)",
+      median     = "Median",
+      quantiles  = "Q1 - Q3",
+      range      = "Min - Max"
+    ),
+    .formats = c(
+      mean_sd   = "xx.x (xx.xx)",
+      quantiles = "xx.x - xx.x",
+      range     = "xx - xx"
+    )
+  )
+
+tbl_tern_cont <- build_table(lyt_tern_cont, adsl)
+tbl_tern_cont
+```
+
+.tip-box[`analyze_vars()` 的 `.stats` 可选值：`n` `mean` `sd` `mean_sd` `median` `quantiles` `iqr` `range` `min` `max`]
+
+---
+class: animated, fadeIn
+
+# 3.5 tern：分类变量 `analyze_vars()`
+
+.pull-left[
+### 场景一：分类变量分布
+
+```{r eval=FALSE}
+adsl2 <- adsl %>%
+  mutate(
+    SEX    = factor(SEX),
+    RACE   = factor(RACE),
+    AGEGR1 = factor(AGEGR1)
+  )
+
+lyt_tern_cat <- basic_table(
+    show_colcounts = TRUE) %>%
+  split_cols_by("ARM") %>%
+  analyze_vars(
+    vars    = c("AGEGR1", "SEX", "RACE"),
+    .stats  = c("count_fraction_fixed_dp") #<<
+  )
+
+tbl_tern_cat <- build_table(
+  lyt_tern_cat, adsl2)
+tbl_tern_cat
+```
+
+.note-box[
+对因子型变量，`analyze_vars()` 自动给出各 level 的 `n (%)`。  
+**务必先把分类变量转成 `factor`！** 尤其当 level 顺序有业务要求时。
+]
+]
+
+.pull-right[
+### 场景二：`count_occurrences()` 事件表
+
+适用于**一人多条记录**（AE、MH、CM）且需要按受试者去重统计 occurrence：
+
+```{r eval=FALSE}
+lyt_occ <- basic_table() %>%
+  split_cols_by("ARM") %>%
+  add_colcounts() %>%
+  count_occurrences(      #<<
+    vars   = "MHDECOD",
+    .stats = "count_fraction_fixed_dp"
+  )
+
+tbl_occ <- build_table(
+  lyt_occ, mh,
+  alt_counts_df = adsl_count  #<<
+)
+tbl_occ
+```
+
+.warn-box[
+`alt_counts_df`：让列头 N 来自 ADSL，  
+不是来自明细事件表——这是高频错误来源！
+]
+]
+
+---
+class: animated, fadeIn
+
+# 3.6 base R vs rtables / tern 对比
+
+| 维度 | base R | rtables / tern |
+|---|---|---|
+| 学习门槛 | 低，语法通用 | 初期抽象，需理解 layout 思维 |
+| 算法透明度 | 高 | 中（很多功能封装好了） |
+| 临床表复用性 | 一般 | 高 |
+| 版式控制 | 需自己处理 | 适合复杂层级表 |
+| 生存分析扩展 | 要搭更多代码 | 有现成函数入口 |
+| 适合场景 | 教学 / 调试 / 高度定制 | 生产 / 标准化 / 团队复用 |
+
+.green-box[
+**教学建议**：先 base R 理解算法 → 再 rtables/tern 提效  
+只有先知道每一行怎么算，后面用框架才不会变成"只会抄模板"
+]
+
+---
+
+name: sec4
+class: inverse, center, middle, animated, fadeIn
+
+# § 4
+# 表格输出方式总览
+
+.section-num[4]
+
+.footnote[[↑ 返回目录](#toc)]
+
+---
+class: animated, fadeIn
+
+# 4.1 输出路径速查图
+
+.pull-left[
+### 结果是 `data.frame`
+
+| 目标格式 | 推荐函数 |
+|---|---|
+| **Excel** | `openxlsx::write.xlsx()` |
+| **Word** | `flextable()` + `officer` |
+| **RTF** | `r2rtf::rtf_body()` → `write_rtf()` |
+
+### 结果是 `rtables` 对象
+
+| 目标格式 | 推荐函数 |
+|---|---|
+| 页面展示 | `print()` / `as_html()` |
+| **RTF** | `formatters::export_as_rtf()` |
+| **Word** | `tt_to_flextable()` + `officer` |
+| **Excel** | `as_result_df()` + `openxlsx` |
+]
+
+.pull-right[
+### 三种格式的定位
+
+.note-box[
+**RTF** → 偏"打印交付"  
+生产环境正式提交，保留完整表格排版
+]
+
+.tip-box[
+**Excel** → 偏"审阅与追踪"  
+QC、内部 review、数据核查
+]
+
+.green-box[
+**DOCX** → 偏"文档集成与业务沟通"  
+CSR、内部报告、幻灯片配套
+]
+
+.warn-box[
+`readxl` 只读不写！写 Excel 用 `openxlsx`。
+]
+]
+
+---
+class: animated, fadeIn
+
+# 4.2 Excel：`openxlsx`
+
+.pull-left[
+### 最简写法
+
+```{r eval=FALSE}
+library(openxlsx)
+
+openxlsx::write.xlsx(
+  demo_table_base,
+  "demographics_base.xlsx"
+)
+```
+
+### 更完整的写法
+
+```{r eval=FALSE}
+wb <- createWorkbook()
+addWorksheet(wb, "Demographics")
+writeData(wb,
+          sheet    = "Demographics",
+          x        = demo_table_base)
+
+# 可以继续添加样式、格式等
+# ... addStyle(), conditionalFormatting() ...
+
+saveWorkbook(wb,
+             file      = "demographics_base.xlsx",
+             overwrite = TRUE)
+```
+]
+
+.pull-right[
+### 常用扩展操作
+
+```{r eval=FALSE}
+# 设置列宽
+setColWidths(wb, 1,
+             cols   = 1:3,
+             widths = c(25, 15, 15))
+
+# 加粗表头
+headerStyle <- createStyle(
+  textDecoration = "bold",
+  halign         = "center"
+)
+addStyle(wb, 1,
+         style = headerStyle,
+         rows  = 1,
+         cols  = 1:3)
+```
+
+.tip-box[
+`createWorkbook()` → `addWorksheet()` → `writeData()` → `saveWorkbook()`  
+是 `openxlsx` 的标准四步流程，可在此基础上叠加样式。
+]
+]
+
+---
+class: animated, fadeIn
+
+# 4.3 Word：`flextable` + `officer`
+
+```{r eval=FALSE}
+library(flextable)
+library(officer)
+
+# ① 把 data.frame 转成 flextable 对象
+ft <- flextable(demo_table_base) %>%
+  theme_booktabs() %>%
+  autofit()
+
+# ② 把 flextable 写入 Word 文档
+doc <- read_docx() %>%
+  body_add_par("Table 14.1.2.1.1 Demographics",
+               style = "heading 1") %>%
+  body_add_flextable(value = ft)
+
+print(doc, target = "demographics_base.docx")
+```
+
+.pull-left[
+.note-box[
+`flextable` 负责**表格对象**  
+`officer` 负责**往 Word 里写内容**
+]
+]
+.pull-right[
+.tip-box[
+如果结果是 `rtables` 对象，可先用 `rtables::tt_to_flextable()` 转换，再接入 `officer` 同样的写入流程
+]
+]
+
+---
+class: animated, fadeIn
+
+# 4.4 RTF：`r2rtf` 语法骨架
+
+### r2rtf 的核心思想："先准备数据，再一层层加表格属性"
+
+```{r eval=FALSE}
+library(r2rtf)
+
+demo_table_base %>%
+  rtf_page(orientation = "landscape",    # ① 页面
+           width = 11, height = 8.5) %>%
+  rtf_title(                             # ② 标题
+    title       = c("Table 14.1.2.1.1",
+                    "Demographics (Full Analysis Set)"),
+    text_format = c("b", "")
+  ) %>%
+  rtf_colheader(                         # ③ 列头
+    colheader     = paste("Characteristic",
+                          "Treatment A (N=8)",
+                          "Treatment B (N=8)", sep=" | "),
+    col_rel_width = c(3, 2, 2)
+  ) %>%
+  rtf_body(                              # ④ 表体
+    col_rel_width      = c(3, 2, 2),
+    text_justification = c("l", "c", "c")
+  ) %>%
+  rtf_footnote(footnote = c(             # ⑤ 脚注
+    "N = number of subjects in each treatment group.",
+    "Percentages are based on column denominator."
+  ), as_table = FALSE) %>%
+  rtf_source(source = "[datasource: ADSL]",
+             as_table = FALSE) %>%
+  rtf_encode() %>%                       # ⑥ 编码
+  write_rtf("demographics_base.rtf")    # ⑦ 写出
+```
+
+---
+class: animated, fadeIn
+
+# 4.5 `r2rtf` 高频参数详解
+
+.panelset[
+.panel[.panel-name[col_rel_width]
+```{r eval=FALSE}
+rtf_body(col_rel_width = c(3, 2, 2))
+```
+
+- 相对宽度比例，不是绝对像素
+- 第一列（row label）通常设更大
+- `rtf_colheader()` 和 `rtf_body()` 的列宽**必须保持一致**
+
+.warn-box[列宽不一致会导致列头和表体错位！]
+]
+.panel[.panel-name[text_justification]
+```{r eval=FALSE}
+rtf_body(text_justification = c("l", "c", "c"))
+```
+
+| 值 | 对齐方式 |
+|---|---|
+| `"l"` | 左对齐（适合 row label） |
+| `"c"` | 居中（适合数值列） |
+| `"r"` | 右对齐 |
+
+]
+.panel[.panel-name[text_format]
+```{r eval=FALSE}
+rtf_title(text_format = c("b", ""))
+rtf_body(text_format  = c("b", "", ""))
+```
+
+| 值 | 样式 |
+|---|---|
+| `"b"` | 加粗 |
+| `"i"` | 斜体 |
+| `"u"` | 下划线 |
+| `"ub"` | 下划线 + 加粗 |
+
+]
+.panel[.panel-name[r2rtf 易错点]
+.warn-box[
+1. `r2rtf` 适合处理**已经整理好的 data.frame**，不是拿来做统计的
+2. `rtf_colheader()` 与 `rtf_body()` 的 `col_rel_width` 必须一致
+3. 第一列通常要更宽，否则 row label 会换行
+4. 含中文、希腊字母、上标脚注编号时，提前用 `utf8Tortf()` 验证
+5. 团队已有封装函数时应**优先复用**，不要每张表从头手写
+]
+]
+]
+
+---
+class: animated, fadeIn
+
+# 4.6 RTF：`formatters::export_as_rtf()`（rtables 对象）
+
+.pull-left[
+### 直接从 rtables 对象导出
+
+```{r eval=FALSE}
+library(formatters)
+
+# 最简写法
+export_as_rtf(
+  tbl_tern_cont,
+  file = "demographics_tern_direct.rtf"
+)
+```
+
+### 控制版式参数
+
+```{r eval=FALSE}
+export_as_rtf(
+  tbl_tern_cont,
+  file        = "demographics_tern_direct.rtf",
+  landscape   = TRUE,       #<<
+  page_type   = "letter",
+  margins     = c(bottom=0.5, left=0.75,
+                  top=0.5, right=0.75),
+  font_family = "Courier",  #<<
+  font_size   = 8,
+  paginate    = TRUE        #<<
+)
+```
+]
+
+.pull-right[
+### 关键参数说明
+
+| 参数 | 说明 |
+|---|---|
+| `landscape` | 横向页面 |
+| `page_type` | 页面尺寸规格 |
+| `margins` | 页边距（英寸） |
+| `font_family` | 必须用 **monospaced** 字体 |
+| `paginate` | 长表自动分页 |
+| `round_type` | 舍入风格（可对齐 SAS 口径） |
+
+.warn-box[
+`font_family` 必须是等宽字体（如 Courier），否则报错！
+]
+
+.note-box[
+官方文档标注为 **experimental**；  
+生产环境建议先做一轮样式验证。  
+更需要深度定制版式 → 转 data.frame 走 `r2rtf`
+]
+]
+
+---
+
+name: sec5
+class: inverse, center, middle, animated, fadeIn
+
+# § 5
+# Survival Analysis 怎么出？
+
+.section-num[5]
+
+.footnote[[↑ 返回目录](#toc)]
+
+---
+class: animated, fadeIn
+
+# 5.1 生存分析的场景
+
+.pull-left[
+### 临床项目中常见的 time-to-event 终点
+
+- **OS** — Overall Survival
+- **PFS** — Progression-Free Survival
+- **DoR** — Duration of Response
+- **TTR** — Time to Response
+
+### 核心包：`survival`
+
+| 函数 | 作用 |
+|---|---|
+| `Surv()` | 构造生存对象 |
+| `survfit()` | Kaplan-Meier 拟合 |
+| `coxph()` | Cox 比例风险模型 |
+]
+
+.pull-right[
+### 关系层次
+
+```
+survival        ← 底层建模
+    ↓
+tern::surv_time()  ← 贴近 TFL 的上层接口
+    ↓
+rtables         ← 表格框架
+    ↓
+formatters / r2rtf  ← 输出
+```
+
+.warn-box[
+**在调用任何生存分析函数之前，先确认：**  
+- `is_event` 的事件定义是否按分析口径
+- 时间变量是否已转成正确单位（月/天）
+- 删失规则是否与 SAP 一致
+这些直接影响 survival summary 的结果！
+]
+]
+
+---
+class: animated, fadeIn
+
+# 5.2 `survival` 基础语法
+
+.pull-left[
+### Kaplan-Meier
+
+```{r eval=FALSE}
+library(survival)
+
+# AVAL：时间变量；is_event：事件标记
+km_fit <- survfit(
+  Surv(AVAL, is_event) ~ ARM,
+  data = adsl
+)
+summary(km_fit)
+```
+
+### Cox 比例风险模型
+
+```{r eval=FALSE}
+cox_fit <- coxph(
+  Surv(AVAL, is_event) ~ ARM + AGE + SEX,
+  data = adsl
+)
+summary(cox_fit)
+```
+
+Cox 模型可直接引出：
+- Hazard Ratio（HR）
+- 95% CI
+- p-value
+]
+
+.pull-right[
+### KM 图：`survminer`（可点到为止）
+
+```{r eval=FALSE}
+library(survminer)
+
+ggsurvplot(
+  km_fit,
+  data       = adsl,
+  risk.table = TRUE,
+  pval       = TRUE
+)
+```
+
+.tip-box[
+`survminer::ggsurvplot()` 适合展示 KM 曲线 + 风险表 + p 值，是临床 KM 图最常用的绘图工具。本章重点仍在表格输出，图形部分点到为止。
+]
+]
+
+---
+class: animated, fadeIn
+
+# 5.3 `tern::surv_time()` — 临床表接口
+
+.pull-left[
+### 基础用法
+
+```{r eval=FALSE}
+library(tern)
+
+lyt_surv <- basic_table(
+    show_colcounts = TRUE) %>%
+  split_cols_by("ARM") %>%
+  surv_time(                        #<<
+    vars      = "AVAL",
+    var_labels = "Overall Survival (Months)",
+    is_event  = "is_event",
+    .stats    = c("median",
+                  "median_ci",
+                  "quantiles",
+                  "range")
+  )
+
+tbl_surv <- build_table(lyt_surv, adsl)
+tbl_surv
+```
+]
+
+.pull-right[
+### 参数说明
+
+| 参数 | 说明 |
+|---|---|
+| `vars` | 时间变量 |
+| `is_event` | 事件标记变量 |
+| `var_labels` | 表里显示的行标题 |
+| `.stats` | 展示哪些统计量 |
+| `control_surv_time()` | 置信区间、分位数细节 |
+
+### 控制 CI 方法
+
+```{r eval=FALSE}
+lyt_surv2 <- basic_table(
+    show_colcounts = TRUE) %>%
+  split_cols_by("ARM") %>%
+  surv_time(
+    vars     = "AVAL",
+    is_event = "is_event",
+    control  = control_surv_time(
+      conf_level = 0.95,
+      conf_type  = "log-log"     #<<
+    )
+  )
+```
+]
+
+---
+class: animated, fadeIn
+
+# 5.4 Survival Table 输出
+
+survival 分析结果同样可以沿用前面的输出路径：
+
+.panelset[
+.panel[.panel-name[RTF（推荐路径）]
+```{r eval=FALSE}
+# rtables 对象 → 直接 export_as_rtf
+library(formatters)
+
+export_as_rtf(
+  tbl_surv,
+  file      = "os_table.rtf",
+  landscape = TRUE,
+  font_size = 8,
+  paginate  = TRUE
+)
+```
+.tip-box[生存分析表通常列较多，建议 `landscape = TRUE`。]
+]
+.panel[.panel-name[Word]
+```{r eval=FALSE}
+library(flextable); library(officer)
+
+ft_surv <- rtables::tt_to_flextable(tbl_surv) %>%
+  flextable::theme_booktabs(bold_header = TRUE)
+
+doc <- officer::read_docx() %>%
+  officer::body_add_par("Overall Survival",
+                        style = "heading 1") %>%
+  officer::body_add_flextable(value = ft_surv)
+
+print(doc, target = "os_table.docx")
+```
+]
+.panel[.panel-name[Excel]
+```{r eval=FALSE}
+# 先转数据框再写 Excel
+tbl_df <- rtables::as_result_df(tbl_surv)
+openxlsx::write.xlsx(tbl_df, "os_table.xlsx")
+```
+.note-box[`as_result_df()` 把 rtables 对象转为易处理的 data.frame，适合 Excel 审阅版。]
+]
+]
+
+---
+
+name: homework
+class: animated, fadeIn
+
+# 课后练习
+
+.pull-left[
+### Part A：base R 出表
+
+1. 用 base R 重做一张 `Weight` 和 `BMI` 的连续变量汇总表
+   - 定义通用 `cont_stats()` 函数
+   - 用 `split()` + `lapply()` 按 ARM 计算
+   - 格式化为临床表显示文本
+
+2. 把 `ETHNIC`（Ethnicity）加入 Demographics Table
+   - 注意 ETHNIC 取值较长，观察格式化输出效果
+
+### Part B：rtables / tern 出表
+
+3. 把 `SEX`、`RACE`、`ETHNIC` 改成 `tern::analyze_vars()` 输出
+   - 记得先把变量转成 `factor`
+   - 尝试指定 level 顺序
+
+4. 用 `count_occurrences()` 输出一张 Medical History 表
+   - 构造一个 MH 明细数据框
+   - 用 `alt_counts_df = adsl_count` 正确指定列分母
+]
+
+.pull-right[
+### Part C：输出
+
+5. 把最终 Demographics 结果分别导出为：
+   - `.xlsx`（`openxlsx`）
+   - `.docx`（`flextable` + `officer`）
+   - `.rtf`（`r2rtf` 和 / 或 `formatters::export_as_rtf()`）
+   - 比较三种格式的视觉差异和适用场景
+
+### Part D：Survival Analysis
+
+6. 用 `survival::survfit()` 做 KM 估计，打印 `summary()`
+7. 用 `tern::surv_time()` 输出同一份数据的 Median OS 表
+8. 比较两者的差异：统计结果是否一致？显示格式有何不同？
+
+.note-box[以上练习均基于本章演示数据 `adsl` 完成]
+]
+
+---
+class: inverse, center, middle, animated, fadeIn
+
+# 本章小结
+
+.large[
+**Table Shell** → 先明确目标结构，理解连续/分类变量的统计量和分母规则
+
+**base R** → `split` · `lapply` · `tapply` · `table` · `prop.table` · `quantile`
+
+**rtables / tern** → `basic_table` · `split_cols_by` · `analyze_vars` · `count_occurrences`
+
+**输出** → data.frame → `openxlsx` / `flextable+officer` / `r2rtf`  
+&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;rtables → `formatters::export_as_rtf` / `tt_to_flextable`
+
+**Survival** → `survival::survfit/coxph` → `tern::surv_time`
+]
+
+--
+
+.large[.green[
+参考文档：[rtables](https://insightsengineering.github.io/rtables/latest-release/) | [tern](https://insightsengineering.github.io/tern/latest-tag/) | [r2rtf CRAN](https://cran.r-project.org/package=r2rtf)
+]]
+
+---
+class: animated, fadeIn, center, middle
+
+# 谢谢！
+
+.large[讲师：Jingya Wang]
+
+.gray[第五章 · 临床汇总表的计算与输出 · 2026]
+
+.footnote[本 slides 使用 [xaringan](https://github.com/yihui/xaringan) 制作]
