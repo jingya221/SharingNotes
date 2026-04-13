@@ -12,7 +12,7 @@
 
 ### 🗂️ Other-Guidelines
 
-#### [R-project Agent 使用指南](docs/notes/Other-Guidelines/R-project Agent使用指南.md)
+#### [R-project Agent 使用指南](docs/notes/Other-Guidelines/R-project-Agent使用指南.md)
 > 作者: 王靖雅 <br>
 
 
