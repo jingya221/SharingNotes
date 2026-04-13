@@ -10,10 +10,16 @@
 
 ## 📚 指南内容
 
+### 🗂️ Other-Guidelines
+
+#### [R-project Agent 使用指南](docs/notes/Other-Guidelines/R-project Agent使用指南.md)
+> 作者: 王靖雅 <br>
+
+
 ### 🗂️ Rcourse
 
 #### [R 课程 Slides](docs/notes/Rcourse/index.md)
-本节收录 R 语言课程的课件，使用 [xaringan](https://github.com/yi...
+本节收录 R 语言课程（Chap4&5）的课件。
 
 
 ### 🗂️ r-project-guide
@@ -37,9 +43,9 @@
 
 ## 📊 统计信息
 
-- **指南分类**: 2 个
-- **文档数量**: 5 篇
-- **最近更新**: 2026-04-10
+- **指南分类**: 3 个
+- **文档数量**: 6 篇
+- **最近更新**: 2026-04-13
 
 ---
 
@@ -84,7 +90,7 @@ SharingNotes/
 
 ---
 
-*📅 最后更新: 2026-04-10*
+*📅 最后更新: 2026-04-13*
 
 <p align="center">
   © 2026 Jingya Wang | <a href="https://github.com/jingya221/SharingNotes">GitHub</a>

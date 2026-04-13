@@ -100,6 +100,8 @@ markdown_extensions:
 nav:
 - 首页: index.md
 - 笔记分类:
+  - Other-Guidelines:
+    - R-project Agent 使用指南: notes/Other-Guidelines/R-project Agent使用指南.md
   - Rcourse:
     - R 课程 Slides: notes/Rcourse/index.md
   - r-project-guide:
