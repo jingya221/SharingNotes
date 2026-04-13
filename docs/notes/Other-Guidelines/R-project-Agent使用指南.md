@@ -44,4 +44,4 @@
 程任务或其他编程语⾔进⾏测试，使⽤前请确认任务类型和编程语⾔。
 2.  如需尝试使⽤，建议搭建⼀个与项⽬隔离并包含参考代码的环境进⾏测试，避免在正式项⽬中直接使
 ⽤。
-3. R pilot项⽬框架以及代码可参考 `Z:\r-projects\R-project-Agent` 中提供的内容，以及说明文档：[R项目框架说明](https://jingya221.github.io/SharingNotes/)。
+3. R pilot项⽬框架以及代码可参考 `Z:\r-projects\R-project-Agent` 中提供的内容，以及说明文档：[R项目框架说明](https://jingya221.github.io/SharingNotes/notes/r-project-guide/01-R%E9%A1%B9%E7%9B%AE%E7%BB%93%E6%9E%84/)。
