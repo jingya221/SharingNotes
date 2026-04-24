@@ -1,0 +1,4868 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>第四章：数据处理与清洗</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="王靖雅" />
+    <meta name="date" content="2026-05-08" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <link href="libs/panelset/panelset.css" rel="stylesheet" />
+    <script src="libs/panelset/panelset.js"></script>
+    <link href="libs/tile-view/tile-view.css" rel="stylesheet" />
+    <script src="libs/tile-view/tile-view.js"></script>
+    <script src="libs/clipboard/clipboard.min.js"></script>
+    <link href="libs/xaringanExtra-clipboard/xaringanExtra-clipboard.css" rel="stylesheet" />
+    <script src="libs/xaringanExtra-clipboard/xaringanExtra-clipboard.js"></script>
+    <script>window.xaringanExtraClipboard(null, {"button":"Copy Code","success":"Copied!","error":"Press Ctrl+C to Copy"})</script>
+    <link href="libs/animate.css/animate.xaringan.css" rel="stylesheet" />
+    <script src="libs/fabric/fabric.min.js"></script>
+    <link href="libs/xaringanExtra-scribble/scribble.css" rel="stylesheet" />
+    <script src="libs/xaringanExtra-scribble/scribble.js"></script>
+    <script>document.addEventListener('DOMContentLoaded', function() { window.xeScribble = new Scribble({"pen_color":["#FF0000"],"pen_size":3,"eraser_size":30,"palette":[]}) })</script>
+    <script src="libs/xaringanExtra-progressBar/progress-bar.js"></script>
+    <link rel="stylesheet" href="Chap4-slides.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+.title[
+# 第四章：数据处理与清洗
+]
+.subtitle[
+## Tidyverse · dplyr · tidyr · stringr · forcats · lubridate
+]
+.author[
+### 王靖雅
+]
+.date[
+### 2026-05-08
+]
+
+---
+
+
+name: toc
+class: animated, fadeIn
+
+
+
+<style>.xe__progress-bar__container {
+  bottom:0;
+  opacity: 1;
+  position:absolute;
+  right:0;
+  left: 0;
+}
+.xe__progress-bar {
+  height: 0.25em;
+  background-color: #2d6a9f;
+  width: calc(var(--slide-current) / var(--slide-total) * 100%);
+}
+.remark-visible .xe__progress-bar {
+  animation: xe__progress-bar__wipe 200ms forwards;
+  animation-timing-function: cubic-bezier(.86,0,.07,1);
+}
+@keyframes xe__progress-bar__wipe {
+  0% { width: calc(var(--slide-previous) / var(--slide-total) * 100%); }
+  100% { width: calc(var(--slide-current) / var(--slide-total) * 100%); }
+}</style>
+
+# 目录
+
+.pull-left[
+.toc-item[.toc-num[§ 0] [本章定位与讲课逻辑](#sec-overview)]
+.toc-item[.toc-num[§ 1] [Tidyverse Core &amp;amp; Foundation](#sec1)]
+.toc-item[.toc-num[§ 2] [Data Transformation（dplyr）](#sec2)]
+.toc-item[.toc-num[§ 3] [Data Joining &amp;amp; Reshaping](#sec3)]
+]
+
+.pull-right[
+.toc-item[.toc-num[§ 4] [Type-Specific Handling](#sec4)]
+.toc-item[.toc-num[§ 5] [SAS / SQL 概念对照](#sec5)]
+.toc-item[.toc-num[★] [课后作业](#homework)]
+.toc-item[.toc-num[★] [本章小结](#summary)]
+]
+
+.footnote[按 `O` 键可鸟瞰所有幻灯片 &amp;ensp;| 按 `←→` 键导航]
+
+---
+name: sec-overview
+class: animated, fadeIn
+
+# 本章定位与讲课逻辑
+
+.pull-left[
+### 讲课主线
+
+1. **环境与共通数据**
+   统一课堂运行环境与示例数据
+
+2. **Tidyverse Core &amp; Foundation**
+   生态 → 冲突/管道 → tibble → 探索
+
+3. **Data Transformation（dplyr）**
+   行操作 → 列操作 → 改列 → 分组汇总
+
+4. **Data Joining &amp; Reshaping**
+   joins → binding → pivot → 缺失值
+
+5. **Type-Specific Handling**
+   字符串 · 因子 · 日期时间 · purrr
+
+6. **补充与收尾**
+   SAS/SQL 对照 · 课后作业
+]
+
+.pull-right[
+### 配套参考文档
+
+| 包 | 文档链接 |
+|---|---|
+| tidyverse | [tidyverse.org](https://tidyverse.org/packages/) |
+| dplyr | [dplyr.tidyverse.org](https://dplyr.tidyverse.org/) |
+| tidyr | [tidyr.tidyverse.org](https://tidyr.tidyverse.org/) |
+| stringr | [stringr.tidyverse.org](https://stringr.tidyverse.org/) |
+| forcats | [forcats.tidyverse.org](https://forcats.tidyverse.org/) |
+| lubridate | [lubridate.tidyverse.org](https://lubridate.tidyverse.org/) |
+| purrr | [purrr.tidyverse.org](https://purrr.tidyverse.org/) |
+
+]
+
+---
+name: sec1
+class: inverse, center, middle, animated, fadeIn
+
+# § 1
+# Tidyverse Core &amp; Foundation
+
+.section-num[1]
+
+.footnote[[&amp;#8593; 返回目录](#toc)]
+
+---
+class: animated, fadeIn
+
+# 1.1 tidyverse 介绍
+
+.note-box[
+`tidyverse` 是一组由 Hadley Wickham 主导开发、共享一致设计哲学（整洁数据 + 管道语法）的 R 包集合，一次 `library(tidyverse)` 即可加载 `ggplot2`、`dplyr`、`tidyr`、`stringr`、`lubridate`、`purrr`、`readr`、`forcats` 等核心包，覆盖数据读入→清洗→变换→可视化的完整分析流程。
+]
+
+.pull-left[
+## 查看完整包清单
+
+
+``` r
+tidyverse::tidyverse_packages()
+```
+
+```
+ [1] "broom"         "conflicted"    "cli"           "dbplyr"       
+ [5] "dplyr"         "dtplyr"        "forcats"       "ggplot2"      
+ [9] "googledrive"   "googlesheets4" "haven"         "hms"          
+[13] "httr"          "jsonlite"      "lubridate"     "magrittr"     
+[17] "modelr"        "pillar"        "purrr"         "ragg"         
+[21] "readr"         "readxl"        "reprex"        "rlang"        
+[25] "rstudioapi"    "rvest"         "stringr"       "tibble"       
+[29] "tidyr"         "xml2"          "tidyverse"    
+```
+]
+
+.pull-right[
+## 核心包速查
+
+| 包 | 一句话介绍 |
+|---|---|
+| **tibble** | 现代数据框：打印清爽、类型明确 |
+| **readr** | 读入CSV/TSV（第三章已讲） |
+| **dplyr** | 筛选·选列·改列·分组汇总·连接 |
+| **tidyr** | 整洁数据·宽长变换·缺失处理 |
+| **stringr** | 字符串检测·替换·截取 |
+| **forcats** | 因子水平顺序·合并稀有类别 |
+| **lubridate** | 解析日期·取年月日·时间对齐 |
+| **purrr** | 函数式循环（本章建立印象） |
+| **ggplot2** | 可视化（第六章详讲） |
+]
+
+
+
+---
+class: animated, fadeIn
+
+# 1.2 `library(tidyverse)` 输出解释
+
+
+``` r
+library(tidyverse)
+```
+
+&lt;img src="image-1.png" width="40%" style="display: block; margin: auto;" /&gt;
+
+加载后输出的三个关键部分：
+
+.pull-left[
+### ① Attaching core tidyverse packages
+列出当前自动附加到搜索路径的**核心包**和**版本号**。
+
+### ② Conflicts（冲突提示）
+```
+dplyr::filter() masks stats::filter()
+dplyr::lag()    masks stats::lag()
+```
+同名函数冲突：会"遮盖"base/stats里的同名函数。
+
+### ③ Use the conflicted package…
+建议安装 `conflicted` 把冲突从"提示"升级为"必须显式选择"。
+]
+
+.pull-right[
+### 处理冲突：conflicted 包
+
+
+``` r
+install.packages("conflicted")
+library(conflicted)
+
+# 一次声明多个偏好
+conflicts_prefer(dplyr::filter, dplyr::lag)
+
+# 也可以逐个声明
+conflicts_prefer("filter", "dplyr")
+conflicts_prefer("lag", "dplyr")
+```
+
+.warn-box[
+`stats::filter()` 是时间序列函数；`dplyr::filter()` 是行过滤函数。**同名不同物**，务必注意！
+]
+]
+
+---
+class: animated, fadeIn
+
+# 1.2 管道操作符 Pipe
+
+.pull-left[
+### 两种管道写法
+
+
+``` r
+# magrittr 管道 %&gt;%
+df %&gt;%
+  filter(department == "Sales") %&gt;%
+  select(name, age, score) %&gt;%
+  arrange(desc(score))
+
+# 原生管道 |&gt; （R 4.1+）
+df |&gt;
+  filter(department == "Sales") |&gt;
+  select(name, age, score) |&gt;
+  arrange(desc(score))
+```
+
+.tip-box[
+`Ctrl+Shift+M` 快速插入管道符  
+
+【POSITRON】打开Settings搜索pipe，选择对应符号类型
+
+【Rstudio】修改程序中pipe符号类型：Tools → Global Options → Code → Editing → 勾选/取消勾选 **Use native pipe operator |&gt;**
+]
+
+&lt;img src="image-2.png" width="60%" style="display: block; margin: auto;" /&gt;
+]
+
+.pull-right[
+### 管道核心思想
+
+- **管道左边是数据，右边是动词**
+- `%&gt;%`（magrittr）与 `|&gt;`（R 4.1+）二选一
+- 团队统一写法即可
+
+### 调试技巧
+
+在管道中间插入 `glimpse()` 观察中间结果：
+
+
+``` r
+df %&gt;%
+  filter(department == "Sales") %&gt;%
+  glimpse() %&gt;%      # ← 调试：查看这一步结果
+  select(name, score) %&gt;%
+  arrange(desc(score))
+```
+
+.note-box[
+调试完成后记得删除中间的 `glimpse()`！
+]
+]
+
+---
+class: animated, fadeIn
+
+# 1.3 tibble vs data.frame
+
+.pull-left[
+### 关键区别
+
+| 维度 | data.frame | tibble |
+|---|---|---|
+| 打印 | 可能显示很多行列 | 默认显示部分行，带类型 |
+| 子集 `[, 1]` | 常退化为向量 | 行为更稳定 |
+| 生态兼容 | base 友好 | dplyr/tidyr 默认输出 |
+
+
+``` r
+class(df)
+```
+
+```
+[1] "tbl_df"     "tbl"        "data.frame"
+```
+
+.tip-box[
+表示对象是 tibble，同时兼容 data.frame。但不是纯dataframe，使用基于dataframe格式的函数时会需要用as.data.frame()转换。
+]
+]
+
+.pull-right[
+### 案例
+
+``` r
+test &lt;- as.tibble(x = 1:3)
+
+class(test)
+```
+
+```
+[1] "tbl_df"     "tbl"        "data.frame"
+```
+
+``` r
+is.data.frame(test)
+```
+
+```
+[1] TRUE
+```
+
+``` r
+is_tibble(test)
+```
+
+```
+[1] TRUE
+```
+
+``` r
+test_df &lt;- as.data.frame(test)
+class(test_df)
+```
+
+```
+[1] "data.frame"
+```
+
+``` r
+is_tibble(test_df)
+```
+
+```
+[1] FALSE
+```
+
+]
+
+---
+class: animated, fadeIn
+
+# 1.3 数据探索函数一览
+
+.panelset[
+.panel[.panel-name[演示用主数据集]
+
+``` r
+library(tidyverse)
+
+df &lt;- tibble(
+  id = 1:10,
+  name = c("张三","李四","王五","赵六","钱七",
+           "孙八","周九","吴十","郑一","陈二"),
+  age = c(25, 30, 35, 28, 32, 45, 50, NA_real_, 29, 31),
+  gender = c("M","F","M","M","F","F","M","F","M","F"),
+  score = c(85, 92, 78, NA_real_, 88, 76, 95, 82, 89, 91), 
+  department = c("Sales","IT","Sales","IT","HR",
+                 "HR","Sales","IT","Sales","IT"),
+  enroll_date = c(
+    "2023-01-05","2023/02/10","2022-12-01","2023-01-05",
+    "2023-03-15","2022-11-20","2023-01-05","2023-02-28",
+    "2023-04-01","2022-10-10"
+  )
+)
+```
+]
+.panel[.panel-name[探索函数对比]
+
+| 函数 | 主要用途 | 
+|---|---|---|
+| `class(df)` | 数据类型 | 
+| `names(df)` | 列名向量 | 
+| `dim(df)` | 行列数 | 
+| `glimpse(df) / str(df)` | 快速看列类型与样例值, str为baseR的函数 | 
+| `summary(df)` | 看分布、缺失、统计摘要 | 
+| `head()/tail()` | 看前后几行原始记录 | 
+
+
+``` r
+class(df)
+```
+
+```
+[1] "tbl_df"     "tbl"        "data.frame"
+```
+
+``` r
+names(df)
+```
+
+```
+[1] "id"          "name"        "age"         "gender"      "score"      
+[6] "department"  "enroll_date"
+```
+
+``` r
+dim(df) 
+```
+
+```
+[1] 10  7
+```
+]
+.panel[.panel-name[glimpse() / str() 快速探索]
+
+``` r
+glimpse(df)
+```
+
+```
+Rows: 10
+Columns: 7
+$ id          &lt;int&gt; 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+$ name        &lt;chr&gt; "张三", "李四", "王五", "赵六", "钱七"…
+$ age         &lt;dbl&gt; 25, 30, 35, 28, 32, 45, 50, NA, 29, 31
+$ gender      &lt;chr&gt; "M", "F", "M", "M", "F", "F", "M", "F"…
+$ score       &lt;dbl&gt; 85, 92, 78, NA, 88, 76, 95, 82, 89, 91
+$ department  &lt;chr&gt; "Sales", "IT", "Sales", "IT", "HR", "H…
+$ enroll_date &lt;chr&gt; "2023-01-05", "2023/02/10", "2022-12-0…
+```
+
+``` r
+str(df)
+```
+
+```
+tibble [10 × 7] (S3: tbl_df/tbl/data.frame)
+ $ id         : int [1:10] 1 2 3 4 5 6 7 8 9 10
+ $ name       : chr [1:10] "张三" "李四" "王五" "赵六" ...
+ $ age        : num [1:10] 25 30 35 28 32 45 50 NA 29 31
+ $ gender     : chr [1:10] "M" "F" "M" "M" ...
+ $ score      : num [1:10] 85 92 78 NA 88 76 95 82 89 91
+ $ department : chr [1:10] "Sales" "IT" "Sales" "IT" ...
+ $ enroll_date: chr [1:10] "2023-01-05" "2023/02/10" "2022-12-01" "2023-01-05" ...
+```
+]
+.panel[.panel-name[summary()]
+
+``` r
+summary(df)
+```
+
+```
+       id            name                age           gender         
+ Min.   : 1.00   Length:10          Min.   :25.00   Length:10         
+ 1st Qu.: 3.25   Class :character   1st Qu.:29.00   Class :character  
+ Median : 5.50   Mode  :character   Median :31.00   Mode  :character  
+ Mean   : 5.50                      Mean   :33.89                     
+ 3rd Qu.: 7.75                      3rd Qu.:35.00                     
+ Max.   :10.00                      Max.   :50.00                     
+                                    NA's   :1                         
+     score        department        enroll_date       
+ Min.   :76.00   Length:10          Length:10         
+ 1st Qu.:82.00   Class :character   Class :character  
+ Median :88.00   Mode  :character   Mode  :character  
+ Mean   :86.22                                        
+ 3rd Qu.:91.00                                        
+ Max.   :95.00                                        
+ NA's   :1                                            
+```
+]
+.panel[.panel-name[head() / tail()]
+
+``` r
+head(df, 4)
+```
+
+```
+# A tibble: 4 × 7
+     id name    age gender score department enroll_date
+  &lt;int&gt; &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt;      &lt;chr&gt;      
+1     1 张三     25 M         85 Sales      2023-01-05 
+2     2 李四     30 F         92 IT         2023/02/10 
+3     3 王五     35 M         78 Sales      2022-12-01 
+4     4 赵六     28 M         NA IT         2023-01-05 
+```
+
+``` r
+tail(df, 4)
+```
+
+```
+# A tibble: 4 × 7
+     id name    age gender score department enroll_date
+  &lt;int&gt; &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt;      &lt;chr&gt;      
+1     7 周九     50 M         95 Sales      2023-01-05 
+2     8 吴十     NA F         82 IT         2023-02-28 
+3     9 郑一     29 M         89 Sales      2023-04-01 
+4    10 陈二     31 F         91 IT         2022-10-10 
+```
+]
+]
+
+---
+name: sec2
+class: inverse, center, middle, animated, fadeIn
+
+# § 2
+# Data Transformation
+# dplyr
+
+.section-num[2]
+
+.footnote[[&amp;#8593; 返回目录](#toc)]
+
+---
+class: animated, fadeIn
+
+# dplyr 动词体系
+
+.pull-left[
+## 单表操作——按对象分三类
+
+### 行（Rows）
+- `filter()` — 按条件保留行
+- `slice()` 系列 — 按位置选行
+- `arrange()` — 排序
+
+### 列（Columns）
+- `select()` — 选列/丢列
+- `rename()` — 改列名
+- `mutate()` — 新增/改造列
+- `relocate()` — 调整列顺序
+
+### 分组（Groups of rows）
+- `group_by()` — 设置分组
+- `summarize()` — 聚合压缩
+- `across()` — 批量跨列操作
+- `count()` — 快速频数统计
+]
+
+.pull-right[
+## 核心管道顺序
+
+```
+数据
+  ↓  filter()     ← 缩小行
+  ↓  mutate()     ← 造变量
+  ↓  select()     ← 投影列
+  ↓  arrange()    ← 排序
+  ↓  group_by()   ← 分组
+  ↓  summarize()  ← 聚合
+结果表
+```
+
+.green-box[
+真实项目里顺序未必唯一，但**先缩行 → 改列 → 投影 → 排序 → 聚合**是最常见的套路。
+]
+]
+
+---
+
+class: animated, fadeIn
+
+# 2.1 行操作
+&lt;img src="dplyr-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+class: animated, fadeIn
+
+# 2.1.0 行操作：逻辑向量基础
+
+在正式讲 `filter()` 之前，先掌握**逻辑向量**的写法：
+
+.pull-left[
+
+``` r
+# 比较运算 → 逻辑向量
+df$age &gt; 30
+```
+
+```
+ [1] FALSE FALSE  TRUE FALSE  TRUE  TRUE  TRUE    NA FALSE  TRUE
+```
+]
+.pull-right[
+
+``` r
+# 缺失值检测
+is.na(df$score)
+```
+
+```
+ [1] FALSE FALSE FALSE  TRUE FALSE FALSE FALSE FALSE FALSE FALSE
+```
+]
+
+
+``` r
+df$gender == "F"                        # 等值比较
+df$department %in% c("Sales", "IT")     # 集合成员
+df$age &gt; 30 &amp; !is.na(df$score)         # 且（&amp;）
+df$age &lt; 25 | df$score &gt; 90            # 或（|）
+```
+
+.warn-box[
+**⚠️ 三个易错点**
+1. `x == NA` **不对**！缺失值判断必须用 `is.na(x)`
+2. 多条件逐元素比较用 `&amp;` / `|`；`&amp;&amp;` / `||` 只对长度为 1 的逻辑值
+3. `filter()` 会**自动丢弃** NA 行（NA 不等于 TRUE）
+]
+
+---
+class: animated, fadeIn
+
+# 2.1.1 数据筛选：`dplyr::filter()`
+
+.panelset[
+.panel[.panel-name[filter()]
+### 函数Usage
+
+
+``` r
+filter(.data, ...,
+       .by = NULL,
+       .preserve = FALSE)
+```
+
+### 参数说明
+
+| 参数 | 含义 |
+|---|---|
+| `.data` | 数据框（管道传入） |
+| `...` | 逻辑表达式，多个条件默认 AND |
+| `.by` | 临时分组（dplyr 1.1+） |
+| `.preserve` | 保留 grouped data 分组结构 |
+
+.warn-box[
+`filter()` 与 `stats::filter()` 同名！加载 dplyr 后默认覆盖，建议显式写 `dplyr::filter()` 或使用 conflicted 包。
+]
+
+]
+.panel[.panel-name[基础筛选]
+
+``` r
+df %&gt;% filter(age &gt; 30)
+```
+
+```
+# A tibble: 5 × 7
+     id name    age gender score department enroll_date
+  &lt;int&gt; &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt;      &lt;chr&gt;      
+1     3 王五     35 M         78 Sales      2022-12-01 
+2     5 钱七     32 F         88 HR         2023-03-15 
+3     6 孙八     45 F         76 HR         2022-11-20 
+4     7 周九     50 M         95 Sales      2023-01-05 
+5    10 陈二     31 F         91 IT         2022-10-10 
+```
+
+``` r
+df %&gt;% filter(gender == "F")
+```
+
+```
+# A tibble: 5 × 7
+     id name    age gender score department enroll_date
+  &lt;int&gt; &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt;      &lt;chr&gt;      
+1     2 李四     30 F         92 IT         2023/02/10 
+2     5 钱七     32 F         88 HR         2023-03-15 
+3     6 孙八     45 F         76 HR         2022-11-20 
+4     8 吴十     NA F         82 IT         2023-02-28 
+5    10 陈二     31 F         91 IT         2022-10-10 
+```
+]
+.panel[.panel-name[多条件]
+
+``` r
+# 逗号等价于 AND
+df %&gt;% filter(department == "Sales", score &gt;= 85)
+```
+
+```
+# A tibble: 3 × 7
+     id name    age gender score department enroll_date
+  &lt;int&gt; &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt;      &lt;chr&gt;      
+1     1 张三     25 M         85 Sales      2023-01-05 
+2     7 周九     50 M         95 Sales      2023-01-05 
+3     9 郑一     29 M         89 Sales      2023-04-01 
+```
+]
+.panel[.panel-name[集合 &amp; 范围]
+
+``` r
+df %&gt;% filter(department %in% c("Sales", "IT"))
+```
+
+```
+# A tibble: 8 × 7
+     id name    age gender score department enroll_date
+  &lt;int&gt; &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt;      &lt;chr&gt;      
+1     1 张三     25 M         85 Sales      2023-01-05 
+2     2 李四     30 F         92 IT         2023/02/10 
+3     3 王五     35 M         78 Sales      2022-12-01 
+4     4 赵六     28 M         NA IT         2023-01-05 
+5     7 周九     50 M         95 Sales      2023-01-05 
+# ℹ 3 more rows
+```
+
+``` r
+df %&gt;% filter(between(age, 25, 35))
+```
+
+```
+# A tibble: 7 × 7
+     id name    age gender score department enroll_date
+  &lt;int&gt; &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt;      &lt;chr&gt;      
+1     1 张三     25 M         85 Sales      2023-01-05 
+2     2 李四     30 F         92 IT         2023/02/10 
+3     3 王五     35 M         78 Sales      2022-12-01 
+4     4 赵六     28 M         NA IT         2023-01-05 
+5     5 钱七     32 F         88 HR         2023-03-15 
+# ℹ 2 more rows
+```
+
+.tip-box[
+between(x, left, right)也是dplyr中的函数，是x &gt;= left &amp; x &lt;= right的简写。
+]
+]
+.panel[.panel-name[缺失值处理]
+
+``` r
+# filter会保留有效 score 的行
+df %&gt;% filter(score &lt;= 80)
+```
+
+```
+# A tibble: 2 × 7
+     id name    age gender score department enroll_date
+  &lt;int&gt; &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt;      &lt;chr&gt;      
+1     3 王五     35 M         78 Sales      2022-12-01 
+2     6 孙八     45 F         76 HR         2022-11-20 
+```
+
+``` r
+# 如需保留缺失值，一定要加上is.na()判断
+df %&gt;% filter(score &lt;= 80 | is.na(score))
+```
+
+```
+# A tibble: 3 × 7
+     id name    age gender score department enroll_date
+  &lt;int&gt; &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt;      &lt;chr&gt;      
+1     3 王五     35 M         78 Sales      2022-12-01 
+2     4 赵六     28 M         NA IT         2023-01-05 
+3     6 孙八     45 F         76 HR         2022-11-20 
+```
+
+``` r
+# 对比原始base的筛选方式
+df[df$score &lt;= 80, ]
+```
+
+```
+# A tibble: 3 × 7
+     id name    age gender score department enroll_date
+  &lt;int&gt; &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt;      &lt;chr&gt;      
+1     3 王五     35 M         78 Sales      2022-12-01 
+2    NA &lt;NA&gt;     NA &lt;NA&gt;      NA &lt;NA&gt;       &lt;NA&gt;       
+3     6 孙八     45 F         76 HR         2022-11-20 
+```
+
+.tip-box[
+对比：`df[df$score &gt;= 80, ]` 在 score 有 NA 时会产生"缺失行"语义；`filter()` 会安全地丢弃 NA 行
+]
+]
+.panel[.panel-name[⚠字符型缺失值与"]
+.warn-box[
+R在字符和数值中使用NA表示空值，而""不是空值（在使用sas读入数据做处理时会经常遇见）
+]
+
+``` r
+df_test &lt;- df[1:3, ]
+df_test$gender[1] &lt;- ""
+df_test$gender[2] &lt;- NA
+```
+.pull-left[
+
+``` r
+df_test %&gt;% filter(!is.na(gender))
+```
+
+```
+# A tibble: 2 × 7
+     id name    age gender score department enroll_date
+  &lt;int&gt; &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt;      &lt;chr&gt;      
+1     1 张三     25 ""        85 Sales      2023-01-05 
+2     3 王五     35 "M"       78 Sales      2022-12-01 
+```
+
+``` r
+df_test %&gt;% filter(is.na(gender))
+```
+
+```
+# A tibble: 1 × 7
+     id name    age gender score department enroll_date
+  &lt;int&gt; &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt;      &lt;chr&gt;      
+1     2 李四     30 &lt;NA&gt;      92 IT         2023/02/10 
+```
+]
+.pull-right[
+
+``` r
+df_test %&gt;% filter(nchar(gender) &gt; 0)
+```
+
+```
+# A tibble: 1 × 7
+     id name    age gender score department enroll_date
+  &lt;int&gt; &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt;      &lt;chr&gt;      
+1     3 王五     35 M         78 Sales      2022-12-01 
+```
+
+``` r
+df_test %&gt;% filter(is.na(gender) | gender == "")
+```
+
+```
+# A tibble: 2 × 7
+     id name    age gender score department enroll_date
+  &lt;int&gt; &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt;      &lt;chr&gt;      
+1     1 张三     25 ""        85 Sales      2023-01-05 
+2     2 李四     30 &lt;NA&gt;      92 IT         2023/02/10 
+```
+]
+]
+.panel[.panel-name[进阶：if_any() / if_all()]
+.pull-left[
+### 跨列条件筛选
+
+
+``` r
+# if_any(cols, fn)：cols 中任意一列满足 fn → 保留该行
+if_any(.cols, .fns, ..., .names = NULL)
+
+# if_all(cols, fn)：cols 中所有列满足 fn → 保留该行
+if_all(.cols, .fns, ..., .names = NULL)
+```
+
+.tip-box[
+`if_any()` / `if_all()` 是 `across()` 的筛选版，用于 `filter()` 中对**多列**同时施加条件，避免手写 `|` / `&amp;` 拼接。
+]
+]
+.pull-right[
+
+``` r
+# if_any：age 或 score 任意一列有 NA 就保留
+df %&gt;% filter(if_any(c(age, score), is.na))
+```
+
+```
+# A tibble: 2 × 7
+     id name    age gender score department enroll_date
+  &lt;int&gt; &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt;      &lt;chr&gt;      
+1     4 赵六     28 M         NA IT         2023-01-05 
+2     8 吴十     NA F         82 IT         2023-02-28 
+```
+
+
+``` r
+# if_all：score 列全部 &gt; 80（等价于 filter(score &gt; 80)，但可扩展到多列）
+df %&gt;% filter(if_all(c(score), ~ .x &gt; 80))
+```
+
+```
+# A tibble: 7 × 7
+     id name    age gender score department enroll_date
+  &lt;int&gt; &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt;      &lt;chr&gt;      
+1     1 张三     25 M         85 Sales      2023-01-05 
+2     2 李四     30 F         92 IT         2023/02/10 
+3     5 钱七     32 F         88 HR         2023-03-15 
+4     7 周九     50 M         95 Sales      2023-01-05 
+5     8 吴十     NA F         82 IT         2023-02-28 
+# ℹ 2 more rows
+```
+
+
+``` r
+# 保留所有数值列都不为 NA 的行
+df %&gt;% filter(if_all(where(is.numeric), ~ !is.na(.x)))
+```
+
+```
+# A tibble: 8 × 7
+     id name    age gender score department enroll_date
+  &lt;int&gt; &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt;      &lt;chr&gt;      
+1     1 张三     25 M         85 Sales      2023-01-05 
+2     2 李四     30 F         92 IT         2023/02/10 
+3     3 王五     35 M         78 Sales      2022-12-01 
+4     5 钱七     32 F         88 HR         2023-03-15 
+5     6 孙八     45 F         76 HR         2022-11-20 
+# ℹ 3 more rows
+```
+]
+]
+]
+
+---
+class: animated, fadeIn
+
+# 2.1.2 按位置选行：`slice()` 家族
+
+.pull-left[
+### 核心区别：slice vs head
+
+| 函数 | 选行依据 | 支持分组 |
+|---|---|---|
+| `head(df, n)` | 前 n 行位置 | 否 |
+| `slice_head(n=5)` | 前 n 行位置 | ✅ 每组取 n 行 |
+| `slice_tail(n=5)` | 后 n 行位置 | ✅ |
+| `slice_min(order_by=x)` | 最小值行 | ✅ |
+| `slice_max(order_by=x)` | 最大值行 | ✅ |
+| `slice_sample(n=3)` | 随机抽行 | ✅ |
+
+.note-box[
+`slice_*` 按**行位置/排序结果**选行；`filter()` 按**条件真假**选行。
+]
+]
+
+.pull-right[
+### 代码示例
+
+
+``` r
+df %&gt;% slice_head(n = 3)
+```
+
+```
+# A tibble: 3 × 7
+     id name    age gender score department enroll_date
+  &lt;int&gt; &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt;      &lt;chr&gt;      
+1     1 张三     25 M         85 Sales      2023-01-05 
+2     2 李四     30 F         92 IT         2023/02/10 
+3     3 王五     35 M         78 Sales      2022-12-01 
+```
+
+
+``` r
+df %&gt;% slice_max(order_by = score, n = 3, na_rm = TRUE, with_ties = FALSE)
+```
+
+```
+# A tibble: 3 × 7
+     id name    age gender score department enroll_date
+  &lt;int&gt; &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt;      &lt;chr&gt;      
+1     7 周九     50 M         95 Sales      2023-01-05 
+2     2 李四     30 F         92 IT         2023/02/10 
+3    10 陈二     31 F         91 IT         2022-10-10 
+```
+
+| 参数 | 含义 |
+|---|---|
+| `order_by` | 按哪列的值排序取极值（必填） |
+| `na_rm` | 排序时是否忽略 NA（默认 `FALSE`，NA 会排在最后） |
+| `with_ties` | 并列值是否全部保留（默认 `TRUE`） |
+]
+
+---
+class: animated, fadeIn
+
+# 2.1.3 排序：`arrange()`
+
+.panelset[
+.panel[.panel-name[arrange()]
+.pull-left[
+### 函数Usage
+
+
+``` r
+arrange(.data, ...,
+        .by_group = FALSE)
+```
+
+- `...`：排序变量，默认**升序**；`desc()` 降序
+- `.by_group`：已分组时是否组内排序
+
+### 代码示例
+
+
+``` r
+df %&gt;% arrange(department, desc(score))
+```
+
+```
+# A tibble: 10 × 7
+     id name    age gender score department enroll_date
+  &lt;int&gt; &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt;      &lt;chr&gt;      
+1     5 钱七     32 F         88 HR         2023-03-15 
+2     6 孙八     45 F         76 HR         2022-11-20 
+3     2 李四     30 F         92 IT         2023/02/10 
+4    10 陈二     31 F         91 IT         2022-10-10 
+5     8 吴十     NA F         82 IT         2023-02-28 
+# ℹ 5 more rows
+```
+]
+
+.pull-right[
+### NA 的排序行为
+
+
+``` r
+# arrange()：NA 默认排到最后
+df %&gt;% arrange(score)
+```
+
+```
+# A tibble: 10 × 7
+     id name    age gender score department enroll_date
+  &lt;int&gt; &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt;      &lt;chr&gt;      
+1     6 孙八     45 F         76 HR         2022-11-20 
+2     3 王五     35 M         78 Sales      2022-12-01 
+3     8 吴十     NA F         82 IT         2023-02-28 
+4     1 张三     25 M         85 Sales      2023-01-05 
+5     5 钱七     32 F         88 HR         2023-03-15 
+# ℹ 5 more rows
+```
+
+``` r
+# 若需 NA 排最前，用 is.na() 辅助
+df %&gt;% arrange(!is.na(score), score)
+```
+
+```
+# A tibble: 10 × 7
+     id name    age gender score department enroll_date
+  &lt;int&gt; &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt;      &lt;chr&gt;      
+1     4 赵六     28 M         NA IT         2023-01-05 
+2     6 孙八     45 F         76 HR         2022-11-20 
+3     3 王五     35 M         78 Sales      2022-12-01 
+4     8 吴十     NA F         82 IT         2023-02-28 
+5     1 张三     25 M         85 Sales      2023-01-05 
+# ℹ 5 more rows
+```
+
+]
+
+]
+.panel[.panel-name[`sort()` vs `order()` vs `arrange()`对比]
+
+| 函数 | 适用对象 | 返回什么 |
+|---|---|---|
+| `sort(x)` | **向量** | 排好序的向量值 |
+| `order(x)` | **向量** | 排序后的**行号索引** |
+| `arrange(df)` | **数据框** | 排好序的完整数据框 |
+
+
+``` r
+# sort()：只能排向量，不能排数据框
+sort(df$score, na.last = TRUE)        # ✅ 向量排序
+
+# order()：返回索引，再用 [] 取行
+df[order(df$score), ]                 # 升序
+df[order(-df$score), ]                # 降序（数值列加负号）
+df[order(df$department, -df$score), ]                # 多列排序
+
+# arrange()：直接排数据框，最清晰
+df %&gt;% arrange(score)                    # 升序
+df %&gt;% arrange(desc(score))              # 降序（任意类型通用）
+df %&gt;% arrange(department, desc(score))  # 多列
+```
+
+]
+]
+
+---
+
+class: animated, fadeIn
+
+# 2.2 列操作：`mutate()`
+&lt;img src="dplyr-3.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+
+---
+class: animated, fadeIn
+
+# 2.2.1 生成列：`mutate()` 
+
+.panelset[
+.panel[.panel-name[基础介绍]
+.pull-left[
+### 函数Usage
+
+
+``` r
+mutate(.data, ...,
+       .by    = NULL,
+       .keep  = c("all","used","none","unused"),
+       .before = NULL,
+       .after  = NULL)
+```
+
+### `.keep` 参数速览
+
+| 值 | 保留哪些原始列 |
+|---|---|
+| `"all"` | 全部（**默认**） |
+| `"used"` | 参与运算的列（适合核对） |
+| `"unused"` | 未参与运算的列 |
+| `"none"` | 不保留原始列 |
+
+.tip-box[
+同一次 `mutate()` 里可以**引用刚生成**的列，这是与 `base::transform()` 的关键区别。
+]
+]
+.pull-right[
+### 基础示例
+
+
+``` r
+df %&gt;%
+  mutate(weighted_score = score * 1.05) %&gt;%
+  select(name, score, weighted_score)
+```
+
+```
+# A tibble: 10 × 3
+  name  score weighted_score
+  &lt;chr&gt; &lt;dbl&gt;          &lt;dbl&gt;
+1 张三     85           89.2
+2 李四     92           96.6
+3 王五     78           81.9
+4 赵六     NA           NA  
+5 钱七     88           92.4
+# ℹ 5 more rows
+```
+
+
+``` r
+df %&gt;%
+  mutate(
+    score_filled = replace_na(score, 0),
+    pass = if_else(score &gt;= 60, TRUE, FALSE,
+                   missing = FALSE),
+*   .keep = "used"
+  )
+```
+
+```
+# A tibble: 10 × 3
+  score score_filled pass 
+  &lt;dbl&gt;        &lt;dbl&gt; &lt;lgl&gt;
+1    85           85 TRUE 
+2    92           92 TRUE 
+3    78           78 TRUE 
+4    NA            0 FALSE
+5    88           88 TRUE 
+# ℹ 5 more rows
+```
+]
+]
+.panel[.panel-name[pmax() / pmin() 逐行极值]
+.pull-left[
+### max / min vs pmax / pmin
+
+| 函数 | 返回 | 适合场景 |
+|---|---|---|
+| `max()` / `min()` | 单个标量 | `summarize()` 全局最值 |
+| `pmax()` / `pmin()` | 等长向量 | `mutate()` 逐行比较 |
+
+
+``` r
+# pmax/pmin：逐行对比两列取最大/最小
+df %&gt;%
+  mutate(
+    max_val = pmax(score, age, na.rm = TRUE),
+    min_val = pmin(score, age, na.rm = TRUE)
+  ) %&gt;%
+  select(name, age, score, max_val, min_val)
+```
+
+```
+# A tibble: 10 × 5
+  name    age score max_val min_val
+  &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;
+1 张三     25    85      85      25
+2 李四     30    92      92      30
+3 王五     35    78      78      35
+4 赵六     28    NA      28      28
+5 钱七     32    88      88      32
+# ℹ 5 more rows
+```
+]
+.pull-right[
+### 对比验证
+
+
+``` r
+# max() 只返回一个标量
+max(df$score, df$age, na.rm = TRUE)
+```
+
+```
+[1] 95
+```
+
+
+``` r
+# pmax() 返回等长向量（每行的逐元素最大值）
+pmax(df$score, df$age, na.rm = TRUE)
+```
+
+```
+ [1] 85 92 78 28 88 76 95 82 89 91
+```
+
+### 错误逐行处理示范
+
+
+``` r
+df %&gt;%
+  mutate(
+    max_val = max(score, age, na.rm = TRUE),
+    min_val = min(score, age, na.rm = TRUE)
+  ) %&gt;%
+  select(name, age, score, max_val, min_val)
+```
+
+```
+# A tibble: 10 × 5
+  name    age score max_val min_val
+  &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;
+1 张三     25    85      95      25
+2 李四     30    92      95      25
+3 王五     35    78      95      25
+4 赵六     28    NA      95      25
+5 钱七     32    88      95      25
+# ℹ 5 more rows
+```
+]
+]
+.panel[.panel-name[ifelse() vs if_else()]
+.pull-left[
+### `base::ifelse()` Usage
+
+
+``` r
+ifelse(test, yes, no)
+```
+
+| 参数 | 含义 |
+|---|---|
+| `test` | 逻辑向量 |
+| `yes` | 为 TRUE 时的返回值 |
+| `no` | 为 FALSE 时的返回值 |
+
+.warn-box[
+返回值类型由 `yes`/`no` 共同决定，可能被静默抬升（如整数变字符）；**NA 将返回 NA**。
+]
+
+
+``` r
+df %&gt;%
+  mutate(youth = ifelse(score &gt;= 90, T, "非高")) %&gt;%
+  select(name, score, youth)
+```
+
+```
+# A tibble: 10 × 3
+  name  score youth
+  &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;
+1 张三     85 非高 
+2 李四     92 TRUE 
+3 王五     78 非高 
+4 赵六     NA &lt;NA&gt; 
+5 钱七     88 非高 
+# ℹ 5 more rows
+```
+]
+.pull-right[
+### `dplyr::if_else()` Usage
+
+
+``` r
+if_else(condition, true, false, missing = NULL, ptype = NULL, size = NULL)
+```
+
+| 参数 | 含义 |
+|---|---|
+| `condition` | 逻辑向量 |
+| `true` / `false` | TRUE / FALSE 时的值（**类型必须一致**） |
+| `missing` | condition 为 NA 时的返回值（可选） |
+
+.tip-box[
+`if_else()` 类型严格：`true` 与 `false` 必须同类型，否则报错；用 `missing =` 参数显式处理 NA。
+]
+
+
+``` r
+df %&gt;%
+  mutate(flag = if_else(score &gt;= 90, "高", "非高",
+                        missing = "缺失")) %&gt;%
+  select(name, score, flag)
+```
+
+```
+# A tibble: 10 × 3
+  name  score flag 
+  &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;
+1 张三     85 非高 
+2 李四     92 高   
+3 王五     78 非高 
+4 赵六     NA 缺失 
+5 钱七     88 非高 
+# ℹ 5 more rows
+```
+]
+]
+.panel[.panel-name[case_when()]
+.pull-left[
+### 函数Usage
+
+
+``` r
+case_when(..., .default = NULL,
+          .ptype = NULL, .size = NULL)
+```
+
+| 参数 | 含义 |
+|---|---|
+| `...` | `条件 ~ 返回值` 对，**自上而下**依次匹配 |
+| `.default` | 所有条件均不满足时的默认值（dplyr 1.1+） |
+
+### 代码示例
+
+
+``` r
+# 写法1：无兜底，不满足条件赋值NA
+df %&gt;%
+  mutate(
+    grade = case_when(
+      score &gt;= 90   ~ "A",
+      score &gt;= 80   ~ "B"
+    )
+  ) %&gt;%
+  select(name, score, grade)
+```
+
+```
+# A tibble: 10 × 3
+  name  score grade
+  &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;
+1 张三     85 B    
+2 李四     92 A    
+3 王五     78 &lt;NA&gt; 
+4 赵六     NA &lt;NA&gt; 
+5 钱七     88 B    
+# ℹ 5 more rows
+```
+
+]
+.pull-right[
+.tip-box[
+若需让 NA 保持 NA，应先写 `is.na(x) ~ NA_character_`，`TRUE ~ "D"`和`.default = "D"`兜底均会改变NA值。
+]
+
+
+``` r
+# 写法2：TRUE ~ /.default = 兜底（NA 也会被匹配为 "C"）
+df %&gt;%
+  mutate(
+    grade = case_when(
+      score &gt;= 90   ~ "A",
+      score &gt;= 80   ~ "B",
+      TRUE          ~ "C"  ##  等同.default = "C"
+    )
+  ) %&gt;% select(name, score, grade)
+```
+
+```
+# A tibble: 10 × 3
+  name  score grade
+  &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;
+1 张三     85 B    
+2 李四     92 A    
+3 王五     78 C    
+4 赵六     NA C    
+5 钱七     88 B    
+# ℹ 5 more rows
+```
+]
+]
+]
+
+---
+
+class: animated, fadeIn
+
+# 2.2.2 列操作：`select()`/`rename()` / `relocate()` / `distinct()`
+&lt;img src="dplyr-2.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+class: animated, fadeIn
+
+# 2.2.2 选择列：`select()`
+
+.pull-left[
+
+### 函数Usage
+
+``` r
+select(.data, ...)
+```
+
+### 常见选择用法
+
+
+``` r
+# 按名字
+select(df, name, age, score)
+
+# 排除列
+select(df, -id)
+
+# 范围
+select(df, name:score)
+
+# 类型选择
+select(df, where(is.numeric))
+
+# 名称匹配
+select(df, starts_with("dep"))
+select(df, ends_with("e"))
+select(df, contains("core"))
+
+# 字符向量
+cols &lt;- c("id", "name", "score")
+select(df, all_of(cols))   # 必须都存在
+select(df, any_of(cols))   # 不存在不报错
+```
+]
+
+.pull-right[
+### 调整列排序示例
+
+
+``` r
+select(df, name, score, everything()) %&gt;% print(n = 5)
+```
+
+```
+# A tibble: 10 × 7
+  name  score    id   age gender department enroll_date
+  &lt;chr&gt; &lt;dbl&gt; &lt;int&gt; &lt;dbl&gt; &lt;chr&gt;  &lt;chr&gt;      &lt;chr&gt;      
+1 张三     85     1    25 M      Sales      2023-01-05 
+2 李四     92     2    30 F      IT         2023/02/10 
+3 王五     78     3    35 M      Sales      2022-12-01 
+4 赵六     NA     4    28 M      IT         2023-01-05 
+5 钱七     88     5    32 F      HR         2023-03-15 
+# ℹ 5 more rows
+```
+
+.tip-box[
+`everything()` 把剩余列追加到末尾，常用于**先展示关键列**再列出其他列。
+]
+]
+
+---
+class: animated, fadeIn
+
+# 2.2.3 改列名：`rename()` / `rename_with()`
+
+.pull-left[
+### 函数Usage
+
+
+``` r
+rename(.data, ...)
+rename_with(.data, .fn,
+            .cols = everything(), ...)
+```
+
+| 参数 | 含义 |
+|---|---|
+| `...` | `新名 = 旧名` 格式，可同时改多列 |
+| `.fn` | 批量改名的函数（如 `str_to_lower`） |
+| `.cols` | 批量改名的范围（默认全部列） |
+
+### 代码示例：rename()
+
+
+``` r
+# 写法：新名 = 旧名
+df %&gt;% rename(department_label = department,
+              gender_label = gender)
+```
+
+```
+# A tibble: 10 × 7
+     id name    age gender_label score department_label
+  &lt;int&gt; &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;        &lt;dbl&gt; &lt;chr&gt;           
+1     1 张三     25 M               85 Sales           
+2     2 李四     30 F               92 IT              
+3     3 王五     35 M               78 Sales           
+4     4 赵六     28 M               NA IT              
+5     5 钱七     32 F               88 HR              
+# ℹ 5 more rows
+# ℹ 1 more variable: enroll_date &lt;chr&gt;
+```
+]
+.pull-right[
+### 代码示例：rename_with()
+
+
+``` r
+# 批量改列名：全部转大写
+df %&gt;% rename_with(str_to_upper)
+```
+
+```
+# A tibble: 10 × 7
+     ID NAME    AGE GENDER SCORE DEPARTMENT ENROLL_DATE
+  &lt;int&gt; &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt;      &lt;chr&gt;      
+1     1 张三     25 M         85 Sales      2023-01-05 
+2     2 李四     30 F         92 IT         2023/02/10 
+3     3 王五     35 M         78 Sales      2022-12-01 
+4     4 赵六     28 M         NA IT         2023-01-05 
+5     5 钱七     32 F         88 HR         2023-03-15 
+# ℹ 5 more rows
+```
+
+
+``` r
+# 批量给数值列加前缀
+df %&gt;% rename_with(~ paste0("v_", .x),
+                   .cols = where(is.numeric))
+```
+
+```
+# A tibble: 10 × 7
+   v_id name  v_age gender v_score department enroll_date
+  &lt;int&gt; &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;    &lt;dbl&gt; &lt;chr&gt;      &lt;chr&gt;      
+1     1 张三     25 M           85 Sales      2023-01-05 
+2     2 李四     30 F           92 IT         2023/02/10 
+3     3 王五     35 M           78 Sales      2022-12-01 
+4     4 赵六     28 M           NA IT         2023-01-05 
+5     5 钱七     32 F           88 HR         2023-03-15 
+# ℹ 5 more rows
+```
+]
+
+---
+class: animated, fadeIn
+
+# 2.2.4 调整列顺序：`relocate()`
+
+.pull-left[
+### 函数Usage
+
+
+``` r
+relocate(.data, ...,
+         .before = NULL,
+         .after  = NULL)
+```
+
+| 参数 | 含义 |
+|---|---|
+| `...` | 要移动的列（支持 `select` 辅助函数） |
+| `.before` | 移到哪列**之前** |
+| `.after` | 移到哪列**之后** |
+
+.tip-box[
+`select()` 也能调整列顺序，但需要列出**全部变量**；`relocate()` 只需指定**目标列**，其余列自动保留。
+]
+]
+.pull-right[
+### 代码示例
+
+
+``` r
+# 把 score 移到 name 后面
+relocate(df, score, .after = name)
+```
+
+```
+# A tibble: 10 × 7
+     id name  score   age gender department enroll_date
+  &lt;int&gt; &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;  &lt;chr&gt;      &lt;chr&gt;      
+1     1 张三     85    25 M      Sales      2023-01-05 
+2     2 李四     92    30 F      IT         2023/02/10 
+3     3 王五     78    35 M      Sales      2022-12-01 
+4     4 赵六     NA    28 M      IT         2023-01-05 
+5     5 钱七     88    32 F      HR         2023-03-15 
+# ℹ 5 more rows
+```
+
+
+``` r
+# 把所有字符列移到最前
+relocate(df, where(is.character))
+```
+
+```
+# A tibble: 10 × 7
+  name  gender department enroll_date    id   age score
+  &lt;chr&gt; &lt;chr&gt;  &lt;chr&gt;      &lt;chr&gt;       &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt;
+1 张三  M      Sales      2023-01-05      1    25    85
+2 李四  F      IT         2023/02/10      2    30    92
+3 王五  M      Sales      2022-12-01      3    35    78
+4 赵六  M      IT         2023-01-05      4    28    NA
+5 钱七  F      HR         2023-03-15      5    32    88
+# ℹ 5 more rows
+```
+
+
+``` r
+# 把所有字符列移到最后
+df %&gt;% relocate(where(is.character), .after = last_col())
+```
+]
+
+---
+class: animated, fadeIn
+
+# 2.2.5 去重：`distinct()`
+
+.pull-left[
+### 函数Usage
+
+
+``` r
+distinct(.data, ...,
+         .keep_all = FALSE)
+```
+
+| 参数 | 含义 |
+|---|---|
+| `...` | 去重依据的列；不填则对全行去重 |
+| `.keep_all` | `FALSE`（默认）只保留去重列；`TRUE` 保留全部列（取每组**第一行**） |
+
+.warn-box[
+`distinct(df, id, .keep_all = TRUE)` 等价于 SAS 的 `PROC SORT NODUPKEY BY id`，**保留每组首条记录**，不是随机保留！务必先 `arrange()` 确定想保留哪行。
+]
+]
+.pull-right[
+### 代码示例
+
+
+``` r
+# 只保留去重列
+distinct(df, department)
+```
+
+```
+# A tibble: 3 × 1
+  department
+  &lt;chr&gt;     
+1 Sales     
+2 IT        
+3 HR        
+```
+
+
+``` r
+# 去重但保留全部列（取每组第一行）
+distinct(df, department, .keep_all = TRUE)
+```
+
+```
+# A tibble: 3 × 7
+     id name    age gender score department enroll_date
+  &lt;int&gt; &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt;      &lt;chr&gt;      
+1     1 张三     25 M         85 Sales      2023-01-05 
+2     2 李四     30 F         92 IT         2023/02/10 
+3     5 钱七     32 F         88 HR         2023-03-15 
+```
+
+
+``` r
+# 先排序再去重，控制保留哪行
+df %&gt;%
+  arrange(desc(score)) %&gt;%
+  distinct(department, .keep_all = TRUE)
+```
+
+```
+# A tibble: 3 × 7
+     id name    age gender score department enroll_date
+  &lt;int&gt; &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt;      &lt;chr&gt;      
+1     7 周九     50 M         95 Sales      2023-01-05 
+2     2 李四     30 F         92 IT         2023/02/10 
+3     5 钱七     32 F         88 HR         2023-03-15 
+```
+]
+
+---
+
+class: animated, fadeIn
+
+# 2.3.1 分组&amp;汇总
+
+&lt;img src="dplyr-4.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+class: animated, fadeIn
+
+# 2.3.1 分组：`group_by()`
+
+.pull-left[
+### 函数Usage
+
+
+``` r
+group_by(.data, ...,
+         .add = FALSE,
+         .drop = TRUE)
+```
+| 参数 | 含义 |
+|---|---|
+| `...` | 分组变量，支持多个 |
+| `.add` | 是否在现有分组基础上追加（默认替换） |
+| `.drop` | 是否自动丢弃没有观测的因子水平 |
+
+.tip-box[
+`group_by()` 是分组的意思，后续可以接分组的生成（`mutate()`）或汇总计算（`summarize()`）。使用结束后一定记得 `ungroup()` 或写 `.groups = "drop"`表示取消分组，避免影响后续计算操作。
+]
+]
+
+.pull-right[
+### group_by + mutate：组内运算
+
+
+``` r
+# 计算每人在部门内的分数排名
+df %&gt;%
+  group_by(department) %&gt;%
+  mutate(rank_in_dept = min_rank(desc(score))) %&gt;%
+  ungroup() %&gt;%
+  select(name, department, score, rank_in_dept) %&gt;%
+  arrange(department, rank_in_dept)
+```
+
+```
+# A tibble: 10 × 4
+  name  department score rank_in_dept
+  &lt;chr&gt; &lt;chr&gt;      &lt;dbl&gt;        &lt;int&gt;
+1 钱七  HR            88            1
+2 孙八  HR            76            2
+3 李四  IT            92            1
+4 陈二  IT            91            2
+5 吴十  IT            82            3
+# ℹ 5 more rows
+```
+]
+
+---
+class: animated, fadeIn
+
+# 2.3.1 汇总：`summarize()`
+
+.pull-left[
+### 函数Usage
+
+
+``` r
+summarize(.data, ...,
+          .by = NULL,
+          .groups = NULL)
+```
+
+### `.groups` 选项
+
+| 值 | 含义 |
+|---|---|
+| `"drop"` | 丢弃所有分组（**推荐**） |
+| `"drop_last"` | 只丢弃最后一层分组 |
+| `"keep"` | 保留输入数据的分组结构 |
+| `"rowwise"` | 每行视为一个独立分组 |
+
+.tip-box[
+`summarize()` 与 `summarise()` 完全等同（英美拼写差异）。
+]
+]
+
+.pull-right[
+### 常用聚合函数
+
+
+``` r
+df %&gt;%
+  group_by(department) %&gt;%
+  summarize(
+    n          = n(),                        # 行数
+    n_valid    = sum(!is.na(score)),         # 非缺失数
+    avg_score  = mean(score, na.rm = TRUE),  # 均值
+    min_score  = min(score, na.rm = TRUE),   # 最小值
+    max_score  = max(score, na.rm = TRUE),   # 最大值
+    sd_score   = sd(score, na.rm = TRUE),    # 标准差
+    n_pass     = sum(score &gt;= 60,
+                     na.rm = TRUE)          # 条件计数
+  ) %&gt;% 
+  ungroup()
+```
+
+```
+# A tibble: 3 × 8
+  department     n n_valid avg_score min_score max_score
+  &lt;chr&gt;      &lt;int&gt;   &lt;int&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;
+1 HR             2       2      82          76        88
+2 IT             4       3      88.3        82        92
+3 Sales          4       4      86.8        78        95
+# ℹ 2 more variables: sd_score &lt;dbl&gt;, n_pass &lt;int&gt;
+```
+]
+
+---
+
+class: animated, fadeIn
+
+# 2.3.2 批量汇总
+
+&lt;img src="dplyr-5.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+class: animated, fadeIn
+
+# 2.3.2 多列批量汇总：`across()`
+
+.pull-left[
+### 函数Usage
+
+
+``` r
+across(.cols, .fns,
+       .names = NULL,
+       .unpack = FALSE)
+```
+
+| 参数 | 含义 |
+|---|---|
+| `.cols` | 要处理的列，使用 tidy-select 语法（`where()`、`starts_with()` 等） |
+| `.fns` | 应用的函数或函数列表（见下方写法） |
+| `.names` | 输出列名模板，`{.col}` 代表原列名，`{.fn}` 代表函数名 |
+| `.unpack` | 函数返回 data.frame 时是否自动展开列（一般不用） |
+
+### `.fns` 常见写法
+
+| 写法 | 示例 | 适合场景 |
+|---|---|---|
+| 单个函数名 | `mean` | 一个函数，无额外参数 |
+| purrr lambda | `~ mean(.x, na.rm = TRUE)` | 需要传参数 |
+| 命名列表 | `list(avg = ~ mean(.x, na.rm = TRUE), n_na = ~ sum(is.na(.x)))` | 同时应用多个函数 |
+
+.warn-box[
+旧写法 `summarise_at()` / `summarise_if()` 已被 `across()` 取代，优先使用 `across()`!
+]
+]
+
+.pull-right[
+### 代码示例
+
+
+``` r
+# .cols 用 where() 选数值列，.fns 用 lambda 传 na.rm
+df %&gt;%
+  group_by(department) %&gt;%
+  summarize(
+    across(where(is.numeric),
+           ~ mean(.x, na.rm = TRUE))
+  ) %&gt;% 
+  ungroup()
+```
+
+```
+# A tibble: 3 × 4
+  department    id   age score
+  &lt;chr&gt;      &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+1 HR           5.5  38.5  82  
+2 IT           6    29.7  88.3
+3 Sales        5    34.8  86.8
+```
+
+
+``` r
+# .names 控制输出列名
+df %&gt;%
+  group_by(department) %&gt;%
+  summarize(
+    across(c(score, age),
+           list(avg = ~ mean(.x, na.rm = TRUE),
+                sd  = ~ sd(.x, na.rm = TRUE)),
+           .names = "{.col}_{.fn}")  # 生成 score_avg, score_sd, age_avg, age_sd
+  ) %&gt;% 
+  ungroup()
+```
+
+```
+# A tibble: 3 × 5
+  department score_avg score_sd age_avg age_sd
+  &lt;chr&gt;          &lt;dbl&gt;    &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt;
+1 HR              82       8.49    38.5   9.19
+2 IT              88.3     5.51    29.7   1.53
+3 Sales           86.8     7.14    34.8  11.0 
+```
+]
+
+---
+class: animated, fadeIn
+
+# 2.3.3 快速频数统计：`count()` / `add_count()`
+
+.pull-left[
+### 函数Usage
+
+
+``` r
+count(x, ..., wt = NULL, sort = FALSE, name = NULL)
+
+add_count(x, ..., wt = NULL, sort = FALSE, name = NULL, .drop = deprecated())
+```
+
+| 参数 | 含义 |
+|---|---|
+| `x` | 数据框（管道传入） |
+| `...` | 分组变量，可多个 |
+| `wt` | 加权列；不填则每行计 1 |
+| `sort` | `TRUE` 按频数降序排列 |
+| `name` | 频数列的列名（默认 `"n"`） |
+
+### 与 summarize 的关系
+
+
+``` r
+# 等价写法
+df %&gt;% count(department)
+
+df %&gt;%
+  group_by(department) %&gt;%
+  summarize(n = n(), .groups = "drop")
+```
+
+.tip-box[
+只需快速频数 → 用 `count()`  
+需要同时计算多种统计量 → 用 `summarize()`
+]
+]
+
+.pull-right[
+### 代码示例
+
+
+``` r
+# 按频数排序，自定义列名
+df %&gt;% count(department, sort = TRUE, name = "人数")
+```
+
+```
+# A tibble: 3 × 2
+  department  人数
+  &lt;chr&gt;      &lt;int&gt;
+1 IT             4
+2 Sales          4
+3 HR             2
+```
+
+
+``` r
+# 二维频数表
+df %&gt;% count(department, gender)
+```
+
+```
+# A tibble: 4 × 3
+  department gender     n
+  &lt;chr&gt;      &lt;chr&gt;  &lt;int&gt;
+1 HR         F          2
+2 IT         F          3
+3 IT         M          1
+4 Sales      M          4
+```
+
+
+``` r
+# add_count：把频数加回原表
+df %&gt;% add_count(department, name = "n_dept") %&gt;%
+  select(name, department, n_dept)
+```
+
+```
+# A tibble: 10 × 3
+  name  department n_dept
+  &lt;chr&gt; &lt;chr&gt;       &lt;int&gt;
+1 张三  Sales           4
+2 李四  IT              4
+3 王五  Sales           4
+4 赵六  IT              4
+5 钱七  HR              2
+# ℹ 5 more rows
+```
+]
+
+---
+class: animated, fadeIn
+
+# 2.4 完整管道案例（dplyr 主干函数）
+
+
+``` r
+report &lt;- df %&gt;%
+* filter(!is.na(score),
+         department %in% c("Sales","IT","HR")) %&gt;%
+* mutate(
+    pass  = if_else(score &gt;= 60, TRUE, FALSE, missing = FALSE),  
+    grade = case_when(
+      score &gt;= 90 ~ "A", score &gt;= 80 ~ "B",
+      score &gt;= 70 ~ "C", TRUE ~ "D")
+  ) %&gt;%
+  select(id, name, department, age, score, pass, grade) %&gt;%
+  rename(department_label = department) %&gt;%                      
+* distinct(id, .keep_all = TRUE) %&gt;%
+  arrange(department_label, desc(score)) %&gt;%
+  group_by(department_label) %&gt;%                                
+* summarize(
+    n = n(), avg_score = mean(score, na.rm = TRUE),
+    max_score = max(score, na.rm = TRUE),
+    n_pass = sum(pass, na.rm = TRUE),
+    n_A = sum(grade == "A", na.rm = TRUE)
+  ) %&gt;%
+  ungroup() %&gt;% 
+  arrange(desc(avg_score))
+
+report
+```
+
+```
+# A tibble: 3 × 6
+  department_label     n avg_score max_score n_pass   n_A
+  &lt;chr&gt;            &lt;int&gt;     &lt;dbl&gt;     &lt;dbl&gt;  &lt;int&gt; &lt;int&gt;
+1 IT                   3      88.3        92      3     2
+2 Sales                4      86.8        95      4     1
+3 HR                   2      82          88      2     0
+```
+
+---
+class: animated, fadeIn
+
+# 2.4 管道步骤解读
+
+| 步骤 | 函数 | 作用 |
+|---|---|---|
+| 1 | `filter(!is.na(score), ...)` | 去掉 score 为 NA 的行；限定 department 范围 |
+| 2 | `mutate(...)` | 新增 `pass`（if_else 二分）和 `grade`（case_when 多档） |
+| 3 | `select(...)` | 只保留分析所需列 |
+| 4 | `rename(department_label = department)` | 改名（新名 = 旧名） |
+| 5 | `distinct(id, .keep_all = TRUE)` | 按 id 去重保留其余列 |
+| 6 | `arrange(department_label, desc(score))` | 先部门升序，部门内分数降序 |
+| 7 | `group_by(department_label)` | 按部门分组 |
+| 8 | `summarize(..., .groups = "drop")` | 每组一行：人数、均分、最高分、通过数、A 级数 |
+| 9 | `arrange(desc(avg_score))` | 对汇总表按均分排序 |
+
+.tip-box[
+可在管道任意两行之间插入 `glimpse()` 或 `count(department_label)` 观察中间结果——调试利器！
+]
+
+---
+name: sec3
+class: inverse, center, middle, animated, fadeIn
+
+# § 3
+# Data Joining &amp; Reshaping
+
+.section-num[3]
+
+.footnote[[&amp;#8593; 返回目录](#toc)]
+
+---
+class: animated, fadeIn
+
+# 3.1 四种多表连接：`left_join` / `right_join` / `inner_join` / `full_join`
+
+.pull-left[
+### 连接类型
+
+| 函数 | 保留哪侧的键 |
+|---|---|
+| `left_join(x, y)` | 保留 **x** 的所有键；y 无匹配补 NA |
+| `right_join(x, y)` | 保留 **y** 的所有键 |
+| `inner_join(x, y)` | 只保留**两边都匹配**的键 |
+| `full_join(x, y)` | 保留键的**并集**，缺侧补 NA |
+
+### 函数共性Usage
+
+
+``` r
+left_join(x, y, by = NULL,
+          copy = FALSE, suffix = c(".x", ".y"),
+          keep = NULL, na_matches = "na",
+          relationship = NULL, unmatched = "drop")
+```
+
+| 参数 | 含义 |
+|---|---|
+| `x`, `y` | 左表与右表 |
+| `by` | 连接键（建议**始终显式写出**） |
+| `suffix` | 同名非键列的后缀（默认 `.x` / `.y`） |
+| `keep` | 是否同时保留两侧键列（`TRUE` 便于核对） |
+| `na_matches` | NA 是否匹配 NA（默认`"na"`为匹配，`"never"` 不匹配） |
+| `relationship` | 声明键关系（`"one-to-one"` / `"many-to-one"` 等） |
+| `unmatched` | 发现不匹配时是否报错（`"error"` 可作保底检查） |
+
+]
+
+.pull-right[
+### 构造示例数据
+
+
+``` r
+employees &lt;- tibble(
+  id   = c(1:3, NA),
+  name = c("Alice","Bob","Charlie", "XXX")
+)
+sales &lt;- tibble(
+  id    = c(2, 3, 4, NA),
+  sales = c(1000, 500, 750, 200)
+)
+
+employees %&gt;% 
+  left_join(sales, by = "id")
+```
+
+```
+# A tibble: 4 × 3
+     id name    sales
+  &lt;dbl&gt; &lt;chr&gt;   &lt;dbl&gt;
+1     1 Alice      NA
+2     2 Bob      1000
+3     3 Charlie   500
+4    NA XXX       200
+```
+
+
+``` r
+## 当不提供by时，会默认识别所有名字一致的作为by变量并输出message提示
+employees %&gt;% 
+  left_join(sales)
+```
+
+```
+Joining with `by = join_by(id)`
+```
+
+```
+# A tibble: 4 × 3
+     id name    sales
+  &lt;dbl&gt; &lt;chr&gt;   &lt;dbl&gt;
+1     1 Alice      NA
+2     2 Bob      1000
+3     3 Charlie   500
+4    NA XXX       200
+```
+]
+
+---
+class: animated, fadeIn
+
+# 3.1 Join 参数详解
+
+.panelset[
+.panel[.panel-name[by / join_by()]
+.pull-left[
+### `by` — 连接键
+
+| 写法 | 说明 |
+|---|---|
+| `by = "id"` | 同名单键 |
+| `by = c("id", "visit")` | 同名多键 |
+| `by = c("subjid" = "id")` | 不同名键（旧写法） |
+| `by = join_by(subjid == id)` | 不同名键（**推荐新写法**） |
+
+.warn-box[
+`by = NULL` 会 natural join（用所有同名列），项目中建议**始终显式写出 `by`**！
+]
+]
+.pull-right[
+
+``` r
+# 同名键
+left_join(x, y, by = "id")
+left_join(x, y, by = c("id", "visit"))
+
+# 不同名键（旧写法）
+left_join(x, y, by = c("subjid" = "id"))
+
+# join_by() 推荐新写法
+left_join(x, y, by = join_by(subjid == id))
+left_join(x, y, by = join_by(id, visit))
+```
+]
+]
+.panel[.panel-name[keep]
+.pull-left[
+### `keep` — 是否保留两侧键列
+
+| 值 | 说明 |
+|---|---|
+| `NULL`（默认） | 合并后只保留左表键列 |
+| `TRUE` | 保留两侧键列，方便核对映射关系 |
+| `FALSE` | 只保留左表键列 |
+
+.tip-box[
+调试连接结果时用 `keep = TRUE` 可以直接看到两侧键的对应关系，确认 join 正确后再去掉。
+]
+]
+.pull-right[
+
+``` r
+employees2 &lt;- rename(employees, subjid = id)
+
+# keep = TRUE：保留两边键列，方便核对映射
+employees2 %&gt;% 
+  left_join(sales, by = join_by(subjid == id), keep = TRUE)
+```
+
+```
+# A tibble: 4 × 4
+  subjid name       id sales
+   &lt;int&gt; &lt;chr&gt;   &lt;dbl&gt; &lt;dbl&gt;
+1      1 Alice      NA    NA
+2      2 Bob         2  1000
+3      3 Charlie     3   500
+4     NA XXX        NA   200
+```
+]
+]
+.panel[.panel-name[na_matches]
+.pull-left[
+### `na_matches` — NA 是否参与匹配
+
+| 值 | 说明 |
+|---|---|
+| `"na"`（默认） | NA 匹配 NA（R 行为） |
+| `"never"` | NA 不匹配 NA（接近 SQL 行为） |
+
+.warn-box[
+项目中若键列可能含 NA，务必明确选择：默认 `"na"` 会把所有 NA 行互相匹配，可能产生意外笛卡尔积！
+]
+]
+.pull-right[
+
+``` r
+# 默认：NA 匹配 NA → id=NA 的行会被连接上
+employees %&gt;% 
+  left_join(sales, by = "id")
+```
+
+```
+# A tibble: 4 × 3
+     id name    sales
+  &lt;dbl&gt; &lt;chr&gt;   &lt;dbl&gt;
+1     1 Alice      NA
+2     2 Bob      1000
+3     3 Charlie   500
+4    NA XXX       200
+```
+
+
+``` r
+# na_matches = "never"：NA 不参与匹配 → id=NA 的行补 NA
+employees %&gt;% 
+  left_join(sales, by = "id", na_matches = "never")
+```
+
+```
+# A tibble: 4 × 3
+     id name    sales
+  &lt;dbl&gt; &lt;chr&gt;   &lt;dbl&gt;
+1     1 Alice      NA
+2     2 Bob      1000
+3     3 Charlie   500
+4    NA XXX        NA
+```
+]
+]
+.panel[.panel-name[unmatched]
+.pull-left[
+### `unmatched` — 不匹配行的处理
+
+| 值 | 说明 |
+|---|---|
+| `"drop"`（默认） | 静默丢弃不匹配行 |
+| `"error"` | 发现会丢行时**直接报错**（推荐用于数据质检） |
+
+
+``` r
+## employees 和 sales 的 id 不是完全一致，所以运行以下都会报错：
+employees %&gt;% 
+  left_join(sales, by = "id", unmatched = "error")
+```
+
+```
+Error in `left_join()`:
+! Each row of `y` must be matched by `x`.
+ℹ Row 3 of `y` was not matched.
+```
+
+``` r
+employees %&gt;% 
+  right_join(sales, by = "id", unmatched = "error")
+```
+
+```
+Error in `right_join()`:
+! Each row of `x` must have a match in `y`.
+ℹ Row 1 of `x` does not have a match.
+```
+
+``` r
+employees %&gt;% 
+  inner_join(sales, by = "id", unmatched = "error")
+```
+
+```
+Error in `inner_join()`:
+! Each row of `x` must have a match in `y`.
+ℹ Row 1 of `x` does not have a match.
+```
+]
+.pull-right[
+### 不报错案例
+
+``` r
+## left_join以左表键值为准
+employees %&gt;% 
+  left_join(sales %&gt;% filter(id != 4), by = "id", unmatched = "error")
+```
+
+```
+# A tibble: 4 × 3
+     id name    sales
+  &lt;dbl&gt; &lt;chr&gt;   &lt;dbl&gt;
+1     1 Alice      NA
+2     2 Bob      1000
+3     3 Charlie   500
+4    NA XXX        NA
+```
+
+``` r
+## right_join以左表键值为准
+employees %&gt;% filter(id != 1) %&gt;% 
+  right_join(sales, by = "id", unmatched = "error")
+```
+
+```
+# A tibble: 4 × 3
+     id name    sales
+  &lt;dbl&gt; &lt;chr&gt;   &lt;dbl&gt;
+1     2 Bob      1000
+2     3 Charlie   500
+3     4 &lt;NA&gt;      750
+4    NA &lt;NA&gt;      200
+```
+
+``` r
+## inner_join需完全一致
+employees %&gt;% filter(id != 1) %&gt;% 
+  inner_join(sales %&gt;% filter(id != 4), by = "id", unmatched = "error")
+```
+
+```
+# A tibble: 2 × 3
+     id name    sales
+  &lt;dbl&gt; &lt;chr&gt;   &lt;dbl&gt;
+1     2 Bob      1000
+2     3 Charlie   500
+```
+
+]
+]
+.panel[.panel-name[relationship]
+.pull-left[
+### `relationship` — 键关系声明
+
+| 值 | 说明 |
+|---|---|
+| `"one-to-one"` | 两侧键均唯一 |
+| `"one-to-many"` | 左表键唯一，右表可重复 |
+| `"many-to-one"` | 左表键可重复，右表键唯一（最常见） |
+| `"many-to-many"` | 两侧键均可重复（会产生笛卡尔积） |
+
+.warn-box[
+不声明时，`many-to-many` 会自行重复匹配！关系声明后，若实际关系不符会**直接报错**，是发现不匹配情况的保底手段。
+]
+]
+.pull-right[
+
+``` r
+# one-to-one：每个员工只对应一条销售记录
+employees %&gt;%
+  left_join(sales, by = "id",
+            relationship = "one-to-one")
+```
+
+```
+# A tibble: 4 × 3
+     id name    sales
+  &lt;dbl&gt; &lt;chr&gt;   &lt;dbl&gt;
+1     1 Alice      NA
+2     2 Bob      1000
+3     3 Charlie   500
+4    NA XXX       200
+```
+
+
+``` r
+# 声明 one-to-one 但实际有重复键 → 报错
+sales_dup &lt;- bind_rows(sales, tibble(id = 2L, sales = 999))
+employees %&gt;%
+  left_join(sales_dup, by = "id",
+            relationship = "one-to-one")
+```
+
+```
+Error in `left_join()`:
+! Each row in `x` must match at most 1 row in `y`.
+ℹ Row 2 of `x` matches multiple rows in `y`.
+```
+]
+]
+]
+
+---
+class: animated, fadeIn
+
+# 3.1 筛选连接：`semi_join` / `anti_join`
+
+.pull-left[
+### 区别于等值连接
+
+| 函数 | 作用 | 是否增加右表列 |
+|---|---|---|
+| `semi_join` | 保留左表**能匹配**右表的行 | ❌ 不增加 |
+| `anti_join` | 保留左表**匹配不上**的行 | ❌ 不增加 |
+
+]
+
+.pull-right[
+
+``` r
+# semi_join：保留有匹配的id
+employees %&gt;% 
+  semi_join(sales, by = "id")
+```
+
+```
+# A tibble: 3 × 2
+     id name   
+  &lt;int&gt; &lt;chr&gt;  
+1     2 Bob    
+2     3 Charlie
+3    NA XXX    
+```
+
+
+``` r
+# anti_join：查出在右表不存在的左表id
+employees %&gt;% 
+  anti_join(sales, by = "id")
+```
+
+```
+# A tibble: 1 × 2
+     id name 
+  &lt;int&gt; &lt;chr&gt;
+1     1 Alice
+```
+]
+
+.tip-box[
+项目中数据连接前可以先检查键唯一性：`count(df, key) %&gt;% filter(n &gt; 1)`
+]
+
+---
+class: animated, fadeIn
+
+# 3.2 纵向/横向拼接：`bind_rows()` / `bind_cols()`
+
+.panelset[
+.panel[.panel-name[bind_rows()]
+.pull-left[
+### 函数Usage
+
+
+``` r
+bind_rows(..., .id = NULL)
+```
+
+| 参数 | 含义 |
+|---|---|
+| `...` | 要拼接的数据框，可传列表 |
+| `.id` | 为每张表添加来源标识列，值为列表名称 |
+
+.tip-box[
+`bind_rows()` 按**列名**对齐，缺少的列自动补 `NA`，适合拼接结构相似但列不完全一致的表。
+]
+
+
+``` r
+# 基础纵向拼接，当列不完全一致：缺列自动补 NA
+bind_rows(
+  tibble(id = 1, a = 10),
+  tibble(id = 2, a = 2, b = "x")
+)
+```
+
+```
+# A tibble: 2 × 3
+     id     a b    
+  &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;
+1     1    10 &lt;NA&gt; 
+2     2     2 x    
+```
+]
+.pull-right[
+
+
+``` r
+# .id 参数：记录每行来自哪个表
+bind_rows(
+  Q1 = tibble(id = 1:2, score = c(80, 90)),
+  Q2 = tibble(id = 1:2, score = c(85, 88)),
+* .id = "quarter"
+)
+```
+
+```
+# A tibble: 4 × 3
+  quarter    id score
+  &lt;chr&gt;   &lt;int&gt; &lt;dbl&gt;
+1 Q1          1    80
+2 Q1          2    90
+3 Q2          1    85
+4 Q2          2    88
+```
+
+
+
+``` r
+# 多个数据批量拼接
+alist &lt;- list(
+  tibble(id = 1, a = 1),
+  tibble(id = 2, a = 2, b = "x"),
+  tibble(id = 3, a = 4, b = "x", c = "t")
+)
+bind_rows(alist)
+```
+
+```
+# A tibble: 3 × 4
+     id     a b     c    
+  &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;
+1     1     1 &lt;NA&gt;  &lt;NA&gt; 
+2     2     2 x     &lt;NA&gt; 
+3     3     4 x     t    
+```
+]
+]
+.panel[.panel-name[bind_rows vs rbind]
+.pull-left[
+### 对比
+
+| 对比点 | `dplyr::bind_rows()` | `base::rbind()` |
+|---|---|---|
+| 列对齐 | 按**列名**对齐，缺列补 NA | 依赖**列位置**，列不一致直接报错 |
+| 类型处理 | 与 tibble 衔接顺 | 因子水平可能静默合并 |
+| 多表批量 | ✅ 直接传列表 | ❌ 需 `do.call(rbind, list(...))` |
+
+.warn-box[
+项目中**始终优先用 `bind_rows()`**；`rbind()` 在列不一致时会直接报错而非对齐。
+]
+]
+.pull-right[
+
+``` r
+# bind_rows：列不一致时按名对齐，缺列补 NA ✅
+bind_rows(
+  tibble(id = 1, a = 1),
+  tibble(id = 2, a = 2, b = "x")
+)
+```
+
+```
+# A tibble: 2 × 3
+     id     a b    
+  &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;
+1     1     1 &lt;NA&gt; 
+2     2     2 x    
+```
+
+
+``` r
+# rbind：列不一致时直接报错 ❌
+rbind(
+  tibble(id = 1, a = 1),
+  tibble(id = 2, a = 2, b = "x")
+)
+```
+
+```
+Error in rbind(deparse.level, ...): numbers of columns of arguments do not match
+```
+]
+]
+.panel[.panel-name[bind_cols()]
+.pull-left[
+### 函数Usage
+
+
+``` r
+bind_cols(..., .name_repair = "unique")
+```
+
+| 参数 | 含义 |
+|---|---|
+| `...` | 要横向拼接的数据框或向量 |
+| `.name_repair` | 列名重复时的处理方式（`"unique"` / `"minimal"` / `"check_unique"`） |
+
+.warn-box[
+`bind_cols()` 是**按行位置**对齐，不做键匹配！  
+只要有业务键，应优先使用 `join`，不要用 `bind_cols()` 拼接不同来源的表！
+]
+]
+.pull-right[
+
+``` r
+# 基础横向拼接（行数必须相同）
+bind_cols(
+  tibble(id   = 1:3),
+  tibble(flag = c(TRUE, FALSE, TRUE))
+)
+```
+
+```
+# A tibble: 3 × 2
+     id flag 
+  &lt;int&gt; &lt;lgl&gt;
+1     1 TRUE 
+2     2 FALSE
+3     3 TRUE 
+```
+
+
+``` r
+# .name_repair 处理重名列
+bind_cols(
+  tibble(id = 1:2, val = c(10, 20)),
+  tibble(id = c("A","B")),
+* .name_repair = "unique"
+)
+```
+
+```
+# A tibble: 2 × 3
+  id...1   val id...3
+   &lt;int&gt; &lt;dbl&gt; &lt;chr&gt; 
+1      1    10 A     
+2      2    20 B     
+```
+]
+]
+]
+
+---
+class: animated, fadeIn
+
+# 3.3 整洁数据与重塑：`pivot_longer()` / `pivot_wider()`
+
+.panelset[
+.panel[.panel-name[概念 &amp; 示例]
+.pull-left[
+### 宽表 vs 长表
+
+| 函数 | 方向 | 行列变化 | 最核心问题 |
+|---|---|---|---|
+| `pivot_longer()` | 宽 → 长 | 行↑ 列↓ | 哪些列要堆叠成行？ |
+| `pivot_wider()` | 长 → 宽 | 列↑ 行↓ | 哪列提供新列名？哪列提供值？ |
+
+### 演示数据
+
+
+``` r
+df_wide &lt;- tibble(
+  id      = 1:3,
+  math    = c(85, 92, 78),
+  english = c(90, 88, 95)
+)
+df_wide
+```
+
+```
+# A tibble: 3 × 3
+     id  math english
+  &lt;int&gt; &lt;dbl&gt;   &lt;dbl&gt;
+1     1    85      90
+2     2    92      88
+3     3    78      95
+```
+]
+.pull-right[
+### 宽 → 长
+
+
+``` r
+#math/english这两列进入了subject列；原来的单元格值进入了score列。
+df_long &lt;- df_wide %&gt;%
+  pivot_longer(
+*   cols     = c(math, english),
+    names_to = "subject",
+    values_to = "score"
+  )
+df_long
+```
+
+```
+# A tibble: 6 × 3
+     id subject score
+  &lt;int&gt; &lt;chr&gt;   &lt;dbl&gt;
+1     1 math       85
+2     1 english    90
+3     2 math       92
+4     2 english    88
+5     3 math       78
+# ℹ 1 more row
+```
+
+### 长 → 宽（还原）
+
+
+``` r
+df_long %&gt;%
+  pivot_wider(names_from = subject, values_from = score)
+```
+
+```
+# A tibble: 3 × 3
+     id  math english
+  &lt;int&gt; &lt;dbl&gt;   &lt;dbl&gt;
+1     1    85      90
+2     2    92      88
+3     3    78      95
+```
+]
+]
+.panel[.panel-name[pivot_longer()]
+.pull-left[
+### 函数Usage（常用部分）
+
+
+``` r
+pivot_longer(
+  data,
+  cols,
+  names_to      = "name",
+  names_prefix  = NULL,
+  names_sep     = NULL,
+  names_pattern = NULL,
+  values_to     = "value",
+  values_drop_na = FALSE,
+  names_transform  = NULL,
+  values_transform = NULL
+)
+```
+
+| 参数 | 含义 |
+|---|---|
+| `cols` | 要拉长的列 |
+| `names_to` | 原列名放入哪个新列 |
+| `values_to` | 原单元格值放入哪个新列 |
+| `names_prefix` | 去掉列名前缀 |
+| `values_drop_na` | 删掉长表中的结构性 NA 行 |
+]
+.pull-right[
+### 处理列名含编号信息
+
+
+``` r
+sales_wide &lt;- tibble(
+  id     = 1:2,
+  week_1 = c(10, 20),
+  week_2 = c(15, 25)
+)
+
+sales_wide %&gt;%
+  pivot_longer(
+    cols         = starts_with("week_"),
+    names_to     = "week",
+*   names_prefix = "week_",
+    values_to    = "sales"
+  )
+```
+
+```
+# A tibble: 4 × 3
+     id week  sales
+  &lt;int&gt; &lt;chr&gt; &lt;dbl&gt;
+1     1 1        10
+2     1 2        15
+3     2 1        20
+4     2 2        25
+```
+
+.tip-box[
+`names_prefix = "week_"` 去掉前缀后，`week` 列里只剩 `"1"`, `"2"` 等序号。配合 `names_transform = list(week = as.integer)` 可直接转整数。
+]
+]
+]
+.panel[.panel-name[pivot_wider()]
+.pull-left[
+### 函数Usage（常用部分）
+
+
+``` r
+pivot_wider(
+  data,
+  id_cols   = NULL,
+  names_from  = name,
+  names_prefix = "",
+  names_sep   = "_",
+  names_glue  = NULL,
+  values_from = value,
+  values_fill = NULL,    # 补默认值
+  values_fn   = NULL     # 聚合函数
+)
+```
+
+| 参数 | 含义 |
+|---|---|
+| `id_cols` | 唯一标识行的列（建议显式写出） |
+| `names_from` | 哪列的值变成新列名 |
+| `values_from` | 哪列的值填入单元格 |
+| `values_fill` | 无匹配时的填充值 |
+| `values_fn` | 重复键时的聚合函数 |
+]
+.pull-right[
+### 长 → 宽 &amp; 聚合
+
+
+``` r
+# 基础：还原成宽表
+df_long %&gt;%
+  pivot_wider(
+    names_from  = subject,
+    values_from = score
+  )
+```
+
+```
+# A tibble: 3 × 3
+     id  math english
+  &lt;int&gt; &lt;dbl&gt;   &lt;dbl&gt;
+1     1    85      90
+2     2    92      88
+3     3    78      95
+```
+
+
+``` r
+# 有重复键时用 values_fn 聚合
+tibble(id = c(1,1,2), subject = c("math","math","math"),
+       score = c(10, 20, 30)) %&gt;%
+  pivot_wider(
+    id_cols   = id,
+    names_from = subject,
+    values_from = score,
+*   values_fn  = max
+  )
+```
+
+```
+# A tibble: 2 × 2
+     id  math
+  &lt;dbl&gt; &lt;dbl&gt;
+1     1    20
+2     2    30
+```
+]
+]
+]
+
+---
+name: sec4
+class: inverse, center, middle, animated, fadeIn
+
+# § 4
+# Type-Specific Handling
+# stringr · lubridate · forcats · purrr
+
+.section-num[4]
+
+.footnote[[&amp;#8593; 返回目录](#toc)]
+
+---
+class: animated, fadeIn
+
+# 4.1 缺失值处理
+
+.panelset[
+.panel[.panel-name[删除：drop_na()]
+.pull-left[
+### 函数Usage
+
+
+``` r
+drop_na(data, ...)
+```
+
+| 参数 | 含义 |
+|---|---|
+| `data` | 数据框（管道传入） |
+| `...` | 要检查的列；不填则检查**所有列** |
+
+- 指定列时：该列含 NA → 删行
+- 不指定时：**任意一列**含 NA → 删行（更严格）
+
+.warn-box[
+`drop_na()` 不加列名，可能意外删除含任意缺失的记录！
+]
+]
+.pull-right[
+
+``` r
+messy &lt;- tibble(
+  id    = c(1, 1, 2, 2),
+  day   = c(1, 2, NA, 2),
+  value = c(10, NA, 30, NA)
+)
+
+# 只删 value 列为 NA 的行
+messy %&gt;% drop_na(value)
+```
+
+```
+# A tibble: 2 × 3
+     id   day value
+  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+1     1     1    10
+2     2    NA    30
+```
+
+
+``` r
+# 不指定列：任意列有 NA 就删（此处等价）
+messy %&gt;% drop_na()
+```
+
+```
+# A tibble: 1 × 3
+     id   day value
+  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+1     1     1    10
+```
+]
+]
+.panel[.panel-name[填补：fill()]
+.pull-left[
+### 函数Usage
+
+
+``` r
+fill(data, ...,
+     .direction = c("down", "up", "downup", "updown"))
+```
+
+| 参数 | 含义 |
+|---|---|
+| `data` | 数据框（管道传入） |
+| `...` | 要填充的列 |
+| `.direction` | 填充方向：`"down"` 向下（**默认**）；`"up"` 向上；`"downup"` 先下后上；`"updown"` 先上后下 |
+
+.tip-box[
+`fill()` 用**上一个（或下一个）非 NA 值**填充当前 NA，常用于纵向重复的分组标签或 LOCF（末次观测值结转）场景。
+]
+
+.warn-box[
+务必配合 `group_by()` 使用，否则会跨组填充——把上一个受试者的值填到下一个受试者里！
+]
+]
+.pull-right[
+
+``` r
+# 向下填充（LOCF）
+messy %&gt;%
+* group_by(id) %&gt;%
+  fill(value, .direction = "down") %&gt;%
+  ungroup()
+```
+
+```
+# A tibble: 4 × 3
+     id   day value
+  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+1     1     1    10
+2     1     2    10
+3     2    NA    30
+4     2     2    30
+```
+
+
+``` r
+# 向上填充（NOCB）
+messy %&gt;%
+  group_by(id) %&gt;%
+  fill(value, .direction = "up") %&gt;%
+  ungroup()
+```
+
+```
+# A tibble: 4 × 3
+     id   day value
+  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+1     1     1    10
+2     1     2    NA
+3     2    NA    30
+4     2     2    NA
+```
+]
+]
+.panel[.panel-name[替换：replace_na()]
+.pull-left[
+### 函数Usage
+
+
+``` r
+# 在 mutate() 中对列使用
+replace_na(x, replace)
+
+# 对整个数据框使用（每列指定替换值）
+replace_na(data, replace = list(col1 = val1, col2 = val2))
+```
+
+| 参数 | 含义 |
+|---|---|
+| `x` | 向量（在 `mutate()` 中用） |
+| `data` | 数据框 |
+| `replace` | 替换值；对数据框传 list，每列一个值 |
+
+.tip-box[
+`replace_na()` 是最直接的**填固定值**方案。与 `coalesce(x, 0)` 等价（`coalesce` 取第一个非 NA）。
+]
+]
+.pull-right[
+
+``` r
+# mutate 中对单列使用
+df %&gt;%
+  mutate(score_clean = replace_na(score, 0)) %&gt;%
+  select(name, score, score_clean)
+```
+
+```
+# A tibble: 10 × 3
+  name  score score_clean
+  &lt;chr&gt; &lt;dbl&gt;       &lt;dbl&gt;
+1 张三     85          85
+2 李四     92          92
+3 王五     78          78
+4 赵六     NA           0
+5 钱七     88          88
+# ℹ 5 more rows
+```
+
+
+``` r
+# 对整个数据框多列同时替换
+messy %&gt;%
+  replace_na(list(value = -99,
+                  day = 99))
+```
+
+```
+# A tibble: 4 × 3
+     id   day value
+  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+1     1     1    10
+2     1     2   -99
+3     2    99    30
+4     2     2   -99
+```
+
+]
+]
+.panel[.panel-name[SAS缺失字符""转换为NA：convert_blanks_to_na()]
+.pull-left[
+
+### 函数Usage（`admiral` 包）
+
+
+``` r
+admiral::convert_blanks_to_na(x)
+```
+
+| 参数 | 含义 |
+|---|---|
+| `x` | 字符向量、数据框或列表；非字符列保持不变 |
+
+- 将所有字符列中的 `""` 转为 `NA_character_`
+- 不影响数值列和日期列
+- 数据框传入时自动遍历所有字符列
+
+.warn-box[
+只转换**纯空字符串 `""`**，含空格的 `"  "` 不会被转换！这种需先用 `str_trim()` 去除首尾空格，再调用本函数。
+]
+]
+.pull-right[
+### 示例
+
+``` r
+library(admiral)
+# 对整个数据框使用（自动处理所有字符列，数值列不受影响）
+df_sas &lt;- tibble(
+  id   = 1:4,
+  name = c("Alice", "", "Bob", " "),
+  flag = c("Y", "", NA, "N")
+)
+
+df_sas %&gt;% convert_blanks_to_na()
+```
+
+```
+# A tibble: 4 × 3
+     id name    flag 
+  &lt;int&gt; &lt;chr&gt;   &lt;chr&gt;
+1     1 "Alice" Y    
+2     2  &lt;NA&gt;   &lt;NA&gt; 
+3     3 "Bob"   &lt;NA&gt; 
+4     4 " "     N    
+```
+
+]
+]
+]
+
+---
+class: animated, fadeIn
+
+# 4.2 字符串处理：`stringr`
+
+.panelset[
+.panel[.panel-name[核心函数概览]
+.pull-left[
+### 函数一览
+
+| 函数 | 类型 | 常见用途 |
+|---|---|---|
+| `str_detect()` | 检测 | 判断是否匹配，放 `filter()` 里筛行 |
+| `str_count()` | 检测 | 统计匹配出现次数 |
+| `str_extract()` | 提取 | 提取**首个**匹配文本 |
+| `str_extract_all()` | 提取 | 提取**所有**匹配文本 |
+| `str_replace()` | 替换 | 替换**首次**匹配 |
+| `str_replace_all()` | 替换 | 替换**全部**匹配 |
+| `str_trim()` | 清洗 | 去首尾空格 |
+| `str_squish()` | 清洗 | 去首尾 + 压缩中间多余空格 |
+| `str_to_lower()` / `str_to_upper()` | 格式化 | 大小写转换 |
+| `str_sub()` | 截取 | 按位置截取子串 |
+| `str_split()` | 拆分 | 按分隔符拆成列表 |
+
+.note-box[
+`pattern` 默认是**正则表达式**；只想匹配字面量时用 `fixed(".")`。  
+数字要写 `"\\d"` 不是 `"\d"`！
+]
+]
+.pull-right[
+### 选函数的思路
+
+```
+我想...
+  ├─ 判断某列是否含某模式   → str_detect()
+  ├─ 统计匹配出现几次       → str_count()
+  ├─ 把匹配内容提取出来     → str_extract()
+  ├─ 把某个模式替换掉       → str_replace_all()
+  ├─ 去掉首尾空格           → str_trim() / str_squish()
+  ├─ 统一大小写             → str_to_lower() / str_to_upper()
+  └─ 按位置截取             → str_sub()
+```
+
+### 正则常用速查
+
+| 符号 | 含义 |
+|---|---|
+| `\\d` | 数字 0-9 |
+| `\\w` | 字母/数字/下划线 |
+| `\\s` | 空白字符 |
+| `.` | 任意单字符 |
+| `+` | 一个或多个 |
+| `*` | 零个或多个 |
+| `^` / `$` | 行首 / 行尾 |
+]
+]
+.panel[.panel-name[检测：str_detect]
+.pull-left[
+### 函数Usage
+
+
+``` r
+str_detect(string, pattern, negate = FALSE)
+str_count(string, pattern)
+```
+
+| 参数 | 含义 |
+|---|---|
+| `string` | 字符向量 |
+| `pattern` | 正则表达式（默认）或 `fixed("字面量")` |
+| `negate` | `TRUE` 时取反（不匹配返回 TRUE） |
+
+
+``` r
+# str_count
+tibble(name = c("BANANA","APPLY","PINEAPPLE")) %&gt;%
+  mutate(n_char = str_count(name, "A"))
+```
+
+```
+# A tibble: 3 × 2
+  name      n_char
+  &lt;chr&gt;      &lt;int&gt;
+1 BANANA         3
+2 APPLY          1
+3 PINEAPPLE      1
+```
+]
+.pull-right[
+
+``` r
+# 模糊筛选：名字中含"三"或"四"
+df %&gt;% filter(str_detect(name, "三|四"))
+```
+
+```
+# A tibble: 2 × 7
+     id name    age gender score department enroll_date
+  &lt;int&gt; &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt;  &lt;dbl&gt; &lt;chr&gt;      &lt;chr&gt;      
+1     1 张三     25 M         85 Sales      2023-01-05 
+2     2 李四     30 F         92 IT         2023/02/10 
+```
+
+
+``` r
+# negate = TRUE：排除含"Sales"的部门
+df %&gt;% 
+  mutate(name_yn = str_detect(name, "三|四")) %&gt;% 
+  select(name, name_yn)
+```
+
+```
+# A tibble: 10 × 2
+  name  name_yn
+  &lt;chr&gt; &lt;lgl&gt;  
+1 张三  TRUE   
+2 李四  TRUE   
+3 王五  FALSE  
+4 赵六  FALSE  
+5 钱七  FALSE  
+# ℹ 5 more rows
+```
+
+.warn-box[
+注意：`str_detect()` 返回**逻辑向量**。
+]
+
+]
+]
+.panel[.panel-name[提取：str_extract]
+.pull-left[
+### 函数Usage
+
+
+``` r
+str_extract(string, pattern)      # 提取首个匹配
+str_extract_all(string, pattern, simplify = FALSE) # 提取所有匹配
+```
+
+| 参数 | 含义 |
+|---|---|
+| `string` | 字符向量 |
+| `pattern` | 正则表达式 |
+| `simplify` | `TRUE` 返回矩阵；`FALSE`（默认）返回列表 |
+
+.tip-box[
+`str_extract()` 只取**第一个**匹配；若需要全部匹配，用 `str_extract_all()`。
+]
+]
+.pull-right[
+
+``` r
+# 提取数字序号（首个匹配）
+tibble(code = c("AE-001","CM-023","MH-105")) %&gt;%
+* mutate(seq_num = str_extract(code, "\\d+"))
+```
+
+```
+# A tibble: 3 × 2
+  code   seq_num
+  &lt;chr&gt;  &lt;chr&gt;  
+1 AE-001 001    
+2 CM-023 023    
+3 MH-105 105    
+```
+
+
+``` r
+# str_extract_all：提取所有小写字母（返回 list）
+c("apples X4", "bag of flour", "bag of sugar", "milk X2") %&gt;%
+* str_extract_all("[a-z]+")
+```
+
+```
+[[1]]
+[1] "apples"
+
+[[2]]
+[1] "bag"   "of"    "flour"
+
+[[3]]
+[1] "bag"   "of"    "sugar"
+
+[[4]]
+[1] "milk"
+```
+
+]
+]
+.panel[.panel-name[替换：str_replace]
+.pull-left[
+### 函数Usage
+
+
+``` r
+str_replace(string, pattern, replacement)      # 替换首次
+str_replace_all(string, pattern, replacement)  # 替换全部
+```
+
+| 参数 | 含义 |
+|---|---|
+| `string` | 字符向量 |
+| `pattern` | 正则表达式 |
+| `replacement` | 替换为的字符串；可用 `\\1` 引用捕获组 |
+
+.tip-box[
+`replacement` 支持 `\\1`、`\\2` 等引用括号捕获的内容，实现格式重组。
+]
+]
+.pull-right[
+
+``` r
+df %&gt;%
+* mutate(enroll_norm = str_replace_all(enroll_date, "/", "-")) %&gt;%
+  select(enroll_date, enroll_norm)
+```
+
+```
+# A tibble: 10 × 2
+  enroll_date enroll_norm
+  &lt;chr&gt;       &lt;chr&gt;      
+1 2023-01-05  2023-01-05 
+2 2023/02/10  2023-02-10 
+3 2022-12-01  2022-12-01 
+4 2023-01-05  2023-01-05 
+5 2023-03-15  2023-03-15 
+# ℹ 5 more rows
+```
+
+
+``` r
+df %&gt;%
+* mutate(enroll_norm = str_replace(enroll_date, "/", "-")) %&gt;%
+  select(enroll_date, enroll_norm)
+```
+
+```
+# A tibble: 10 × 2
+  enroll_date enroll_norm
+  &lt;chr&gt;       &lt;chr&gt;      
+1 2023-01-05  2023-01-05 
+2 2023/02/10  2023-02/10 
+3 2022-12-01  2022-12-01 
+4 2023-01-05  2023-01-05 
+5 2023-03-15  2023-03-15 
+# ℹ 5 more rows
+```
+
+]
+]
+.panel[.panel-name[清洗：str_trim / str_squish / str_to_*]
+.pull-left[
+### 函数Usage
+
+
+``` r
+str_trim(string, side = c("both", "left", "right"))
+str_squish(string)
+str_to_lower(string, locale = "en")
+str_to_upper(string, locale = "en")
+str_to_title(string, locale = "en")
+```
+
+| 函数 | 作用 |
+|---|---|
+| `str_trim()` | 去首尾空格（`side` 控制方向） |
+| `str_squish()` | 去首尾 + 中间多余空格压缩为一个 |
+| `str_to_lower()` | 全部转小写 |
+| `str_to_upper()` | 全部转大写 |
+| `str_to_title()` | 每词首字母大写 |
+
+]
+.pull-right[
+
+``` r
+# str_squish vs str_trim
+tibble(raw = c("  alice ","BOB","  Carol  Lee ")) %&gt;%
+  mutate(
+    trimmed = str_trim(raw),       # 只去首尾
+    squished = str_squish(raw),    # 去首尾+压缩中间  
+    lower = str_to_lower(squished),
+    upper = str_to_upper(squished),
+    title = str_to_title(squished)
+  )
+```
+
+```
+# A tibble: 3 × 6
+  raw             trimmed    squished  lower     upper title
+  &lt;chr&gt;           &lt;chr&gt;      &lt;chr&gt;     &lt;chr&gt;     &lt;chr&gt; &lt;chr&gt;
+1 "  alice "      alice      alice     alice     ALICE Alice
+2 "BOB"           BOB        BOB       bob       BOB   Bob  
+3 "  Carol  Lee " Carol  Lee Carol Lee carol lee CARO… Caro…
+```
+
+]
+]
+.panel[.panel-name[截取 &amp; 拆分：str_sub / str_split_i]
+.pull-left[
+### `str_sub` 函数Usage
+
+
+``` r
+str_sub(string, start = 1L, end = -1L)
+str_sub(string, start, end) &lt;- value   # 赋值形式
+```
+
+| 参数 | 含义 |
+|---|---|
+| `start` / `end` | 截取起止位置（负数从末尾数） |
+
+
+``` r
+# str_sub：按位置截取子串
+tibble(date_str = c("2023-01-05", "2022-12-01")) %&gt;%
+  mutate(
+    year  = str_sub(date_str, 1, 4),    # 前4位
+    month = str_sub(date_str, 6, 7),    # 第6-7位
+*   day   = str_sub(date_str, -2)       # 末2位
+  )
+```
+
+```
+# A tibble: 2 × 4
+  date_str   year  month day  
+  &lt;chr&gt;      &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;
+1 2023-01-05 2023  01    05   
+2 2022-12-01 2022  12    01   
+```
+.tip-box[
+负数下标从**字符串末尾**倒数：`-1` = 最后1位，`-2` = 倒数第2位起。
+]
+]
+.pull-right[
+### `str_split_i` 函数Usage
+
+
+``` r
+str_split_i(string, pattern, i)
+```
+
+| 参数 | 含义 |
+|---|---|
+| `pattern` | 分隔符（正则表达式） |
+| `i` | 取第几段（正整数，负数从末尾数） |
+
+.note-box[
+`str_split_i()` = `str_split()` 的简化版：直接返回**字符向量**（第 i 段），比 `str_split()` 返回 list 再取元素更方便在 `mutate()` 中使用。
+]
+
+
+``` r
+# str_split_i：按分隔符拆分后直接取第 i 段
+tibble(date_str = c("2023-01-05", "2022-12-01")) %&gt;%
+  mutate(
+    year  = str_split_i(date_str, "-", 1),  
+    month = str_split_i(date_str, "-", 2),
+    day   = str_split_i(date_str, "-", 3)
+  )
+```
+
+```
+# A tibble: 2 × 4
+  date_str   year  month day  
+  &lt;chr&gt;      &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;
+1 2023-01-05 2023  01    05   
+2 2022-12-01 2022  12    01   
+```
+]
+]
+.panel[.panel-name[列拆分：separate]
+.pull-left[
+### 函数Usage
+
+
+``` r
+tidyr::separate(data, col, into,
+                sep = "[^[:alnum:]]+",
+                remove = TRUE,
+                convert = FALSE)
+```
+
+| 参数 | 含义 |
+|---|---|
+| `col` | 要拆分的列名 |
+| `into` | 拆分后的新列名向量 |
+| `sep` | 分隔符（正则或字符） |
+| `remove` | 是否删除原列（默认 `TRUE`） |
+| `convert` | 是否自动将数字列转为 numeric |
+
+.tip-box[
+`separate()` 直接把一列拆成多列，适合列名含编码信息的情形（如 `"HR-001"` 拆成部门码 + 序号）。
+]
+]
+.pull-right[
+
+``` r
+# 按 "-" 拆成两列
+tibble(code = c("HR-001","IT-002","Sales-003")) %&gt;%
+  tidyr::separate(code,
+                  into    = c("部门码", "序号"),
+                  sep     = "-",
+                  remove  = FALSE,
+*                 convert = TRUE)
+```
+
+```
+# A tibble: 3 × 3
+  code      部门码  序号
+  &lt;chr&gt;     &lt;chr&gt;  &lt;int&gt;
+1 HR-001    HR         1
+2 IT-002    IT         2
+3 Sales-003 Sales      3
+```
+
+
+``` r
+# sep 支持正则：按任意非字母数字字符拆分
+tibble(x = c("2023.01.05", "2022-12-01", "2021/06/30")) %&gt;%
+  tidyr::separate(x,
+                  into    = c("year", "month", "day"),
+                  convert = TRUE)
+```
+
+```
+# A tibble: 3 × 3
+   year month   day
+  &lt;int&gt; &lt;int&gt; &lt;int&gt;
+1  2023     1     5
+2  2022    12     1
+3  2021     6    30
+```
+]
+]
+]
+
+---
+class: animated, fadeIn
+
+# 4.3 日期时间：`lubridate`
+
+.panelset[
+.panel[.panel-name[核心函数概览]
+.pull-left[
+### 函数分类速查
+
+| 类别 | 代表函数 |
+|---|---|
+| 解析日期 | `ymd()`, `mdy()`, `dmy()` |
+| 解析日期时间 | `ymd_hms()`, `ymd_hm()` |
+| 提取组件 | `year()`, `month()`, `mday()`, `wday()` |
+| 取整对齐 | `floor_date()`, `ceiling_date()`, `round_date()` |
+| 时间段（Period） | `years()`, `months()`, `days()`, `hours()` |
+| 时间段（Duration） | `dyears()`, `ddays()`, `dhours()` |
+| 区间（Interval） | `interval()`, `int_length()`, `int_start()` |
+| 时区 | `with_tz()`, `force_tz()` |
+
+]
+.pull-right[
+### 典型场景：解析 + 提取 + 对齐
+
+
+``` r
+df %&gt;%
+  mutate(
+*   enroll = ymd(str_replace_all(enroll_date, "/", "-")),
+    enroll_year  = year(enroll),
+    enroll_month = month(enroll, label = TRUE), ## 默认F, label = T 输出字符
+    enroll_wday  = wday(enroll), 
+*   enroll_floor = floor_date(enroll, "month")
+  ) %&gt;%
+  select(enroll_date, enroll, enroll_year,
+         enroll_month, enroll_wday, enroll_floor) %&gt;%
+  print(width = Inf)
+```
+
+```
+# A tibble: 10 × 6
+  enroll_date enroll     enroll_year enroll_month enroll_wday enroll_floor
+  &lt;chr&gt;       &lt;date&gt;           &lt;dbl&gt; &lt;ord&gt;              &lt;dbl&gt; &lt;date&gt;      
+1 2023-01-05  2023-01-05        2023 1月                    5 2023-01-01  
+2 2023/02/10  2023-02-10        2023 2月                    6 2023-02-01  
+3 2022-12-01  2022-12-01        2022 12月                   5 2022-12-01  
+4 2023-01-05  2023-01-05        2023 1月                    5 2023-01-01  
+5 2023-03-15  2023-03-15        2023 3月                    4 2023-03-01  
+# ℹ 5 more rows
+```
+]
+]
+.panel[.panel-name[解析：Parse date-times]
+.pull-left[
+### 按年月日顺序命名函数
+
+| 字符串格式 | 函数 |
+|---|---|
+| `"2023-01-05"` | `ymd("2023-01-05")` |
+| `"01/05/2023"` | `mdy("01/05/2023")` |
+| `"05 Jan 2023"` | `dmy("05 Jan 2023")` |
+| `"2023-01-05 15:30:00"` | `ymd_hms(...)` |
+| `"2023-01-05 15:30"` | `ymd_hm(...)` |
+| `20230105` | `ymd(20230105)` |
+
+.tip-box[
+函数名就是**元素顺序**：`y` = year，`m` = month，`d` = day，`h/m/s` = hour/minute/second。分隔符可以是 `-` `/` 空格，lubridate 自动识别。
+]
+
+
+``` r
+# 解析日期时间（带时区）
+ymd_hms("2023-01-05 15:30:00", tz = "Asia/Shanghai")
+```
+
+```
+[1] "2023-01-05 15:30:00 CST"
+```
+
+``` r
+ymd_hms("2023-01-05T15:30:00")
+```
+
+```
+[1] "2023-01-05 15:30:00 UTC"
+```
+]
+.pull-right[
+
+``` r
+# 各种格式字符串均可解析
+ymd_hm("2023-01-05T15:30")
+```
+
+```
+[1] "2023-01-05 15:30:00 UTC"
+```
+
+``` r
+ymd("2023-01-05")
+```
+
+```
+[1] "2023-01-05"
+```
+
+``` r
+mdy("01/05/2023")
+```
+
+```
+[1] "2023-01-05"
+```
+
+``` r
+dmy("05-Jan-2023")
+```
+
+```
+[1] "2023-01-05"
+```
+
+``` r
+ymd(20230105)           # 数字也可
+```
+
+```
+[1] "2023-01-05"
+```
+
+
+``` r
+# 批量解析混合格式（NA 对应无法解析的）
+ymd(c("2023-01-05", "2022/12/01", "not-a-date"))
+```
+
+```
+[1] "2023-01-05" "2022-12-01" NA          
+```
+]
+]
+.panel[.panel-name[提取组件：Get &amp; Set]
+.pull-left[
+### 常用提取函数
+
+| 函数 | 提取内容 |
+|---|---|
+| `year(x)` | 年份 |
+| `month(x, label = TRUE)` | 月份（`label=TRUE` 返回缩写） |
+| `mday(x)` | 月内第几天（1-31） |
+| `wday(x, label = TRUE)` | 周几（`label=TRUE` 返回缩写） |
+| `week(x)` | 年内第几周 |
+| `quarter(x)` | 季度 |
+| `hour(x)` / `minute(x)` / `second(x)` | 时 / 分 / 秒 |
+
+.tip-box[
+赋值形式可直接修改组件：`year(d) &lt;- 2025` 会把日期的年份替换为 2025。
+]
+]
+.pull-right[
+
+``` r
+d &lt;- ymd("2026-05-08")
+
+year(d);  month(d);  mday(d)
+```
+
+```
+[1] 2026
+```
+
+```
+[1] 5
+```
+
+```
+[1] 8
+```
+
+``` r
+wday(d, label = TRUE)         
+```
+
+```
+[1] 周五
+Levels: 周日 &lt; 周一 &lt; 周二 &lt; 周三 &lt; 周四 &lt; 周五 &lt; 周六
+```
+
+``` r
+week(d);  quarter(d)
+```
+
+```
+[1] 19
+```
+
+```
+[1] 2
+```
+
+]
+]
+.panel[.panel-name[取整：floor / ceiling / round]
+.pull-left[
+### 函数Usage
+
+
+``` r
+floor_date(x, unit = "second")    # 向下取整（含边界）
+ceiling_date(x, unit = "second")  # 向上取整
+round_date(x, unit = "second")    # 四舍五入
+```
+
+`unit` 可取：`"second"` `"minute"` `"hour"` `"day"` `"week"` `"month"` `"quarter"` `"year"`
+
+.tip-box[
+`floor_date(date, "month")` = 当月第 1 天；常用于**按月分组**或**找每月起始日**。
+]
+
+
+``` r
+# rollback：回退到上月最后一天
+rollback(ymd("2023-03-31"))   # → 2023-02-28
+```
+]
+.pull-right[
+
+``` r
+d &lt;- ymd_hms("2023-06-15 14:37:22")
+
+*floor_date(d, "month")    # 月初
+```
+
+```
+[1] "2023-06-01 UTC"
+```
+
+``` r
+ceiling_date(d, "month")  # 下月初
+```
+
+```
+[1] "2023-07-01 UTC"
+```
+
+``` r
+round_date(d, "day")      # 最近整天
+```
+
+```
+[1] "2023-06-16 UTC"
+```
+
+``` r
+floor_date(d, "week")     # 本周周日（默认）
+```
+
+```
+[1] "2023-06-11 UTC"
+```
+
+]
+]
+.panel[.panel-name[时间运算：Period / Duration / Interval]
+.pull-left[
+### 三种时间跨度
+
+| 类型 | 构造方式 | 特点 |
+|---|---|---|
+| **Period** | `years(1)`, `months(3)`, `days(7)` | 按日历计算，考虑闰年/DST |
+| **Duration** | `dyears(1)`, `ddays(7)`, `dhours(2)` | 固定秒数，不考虑日历 |
+| **Interval** | `interval(start, end)` 或 `start %--% end` | 有明确起止点的时间段 |
+
+.tip-box[
+日期加减用 **Period**（如 `+months(1)` 自动处理月末）；物理时间差用 **Duration**；判断是否落在某时段内用 **Interval**。
+]
+
+``` r
+d &lt;- ymd("2023-01-31")
+d + months(1)    # Period：按日历 +1 个月（每月天数不同）
+```
+
+```
+[1] NA
+```
+
+``` r
+d %m+% months(1)   # %m+% lubridate 专门设计来解决 Period 加减时的月末溢出问题
+```
+
+```
+[1] "2023-02-28"
+```
+
+``` r
+d + dmonths(1)     # Duration：dmonths 固定秒数（30.4375天 × 86400秒）
+```
+
+```
+[1] "2023-03-02 10:30:00 UTC"
+```
+]
+.pull-right[
+
+
+``` r
+# Interval：两个日期之间的区间
+start &lt;- ymd("2023-01-01")
+end   &lt;- ymd("2023-06-30")
+itv   &lt;- interval(start, end)       # 或 start %--% end
+itv; class(itv)
+```
+
+```
+[1] 2023-01-01 UTC--2023-06-30 UTC
+```
+
+```
+[1] "Interval"
+attr(,"package")
+[1] "lubridate"
+```
+
+``` r
+int_length(itv) / 86400             # 转换为天数
+```
+
+```
+[1] 180
+```
+
+
+``` r
+# 判断日期是否落在区间内
+ymd("2023-03-15") %within% itv
+```
+
+```
+[1] TRUE
+```
+
+
+``` r
+end - start; class(end - start); as.numeric(end - start)
+```
+
+```
+Time difference of 180 days
+```
+
+```
+[1] "difftime"
+```
+
+```
+[1] 180
+```
+]
+]
+]
+
+---
+class: animated, fadeIn
+
+# 4.4 因子处理：`forcats`
+
+.panelset[
+.panel[.panel-name[核心函数概览]
+.pull-left[
+### 最常用函数
+
+| 函数 | 常见用途 |
+|---|---|
+| `fct_relevel()` | 手工指定水平位置 |
+| `fct_rev()` | 反转水平顺序 |
+| `fct_infreq()` | 按频数重排，条形图常用 |
+| `fct_reorder()` | 按另一数值变量重排 |
+| `fct_lump_n()` | 保留前 n 类，其余并成 Other |
+| `fct_lump_prop()` | 按比例保留 |
+| `fct_na_value_to_level()` | 把 NA 变成可展示的水平 |
+
+.tip-box[
+图表默认按**字母序**排类别，`forcats` 适合绘图时更改组别排序。
+]
+]
+.pull-right[
+### 手动指定顺序
+
+
+``` r
+new_df &lt;- df %&gt;%
+  mutate(
+    department = fct_relevel(
+      factor(department),
+*     "HR", "Sales","IT"
+    )
+  )
+new_df$department
+```
+
+```
+ [1] Sales IT    Sales IT    HR    HR    Sales IT    Sales IT   
+Levels: HR Sales IT
+```
+
+### 反转顺序
+
+
+``` r
+fct_rev(new_df$department)
+```
+
+```
+ [1] Sales IT    Sales IT    HR    HR    Sales IT    Sales IT   
+Levels: IT Sales HR
+```
+]
+]
+.panel[.panel-name[基于其他变量排序：fct_infreq / fct_reorder]
+.pull-left[
+### 函数Usage
+
+
+``` r
+fct_infreq(f, ordered = NA)
+fct_reorder(.f, .x, .fun = median,
+            ..., .desc = FALSE)
+```
+
+| 函数 | 作用 |
+|---|---|
+| `fct_infreq()` | 按**出现频数**降序排列水平（最多的排第一） |
+| `fct_reorder()` | 按另一数值列的**汇总值**（默认中位数）排列水平 |
+
+]
+.pull-right[
+
+``` r
+# fct_infreq：出现最多的类别排最前
+df %&gt;%
+* mutate(department = fct_infreq(factor(department))) %&gt;%
+  count(department)
+```
+
+```
+# A tibble: 3 × 2
+  department     n
+  &lt;fct&gt;      &lt;int&gt;
+1 IT             4
+2 Sales          4
+3 HR             2
+```
+
+
+``` r
+# fct_reorder：按各部门均分倒序排
+new_df &lt;- df %&gt;%
+  group_by(department) %&gt;%
+  summarize(avg = mean(score, na.rm = TRUE), .groups = "drop") %&gt;%
+* mutate(department = fct_reorder(department, desc(avg)))
+new_df
+```
+
+```
+# A tibble: 3 × 2
+  department   avg
+  &lt;fct&gt;      &lt;dbl&gt;
+1 HR          82  
+2 IT          88.3
+3 Sales       86.8
+```
+
+``` r
+new_df$department
+```
+
+```
+[1] HR    IT    Sales
+Levels: IT Sales HR
+```
+]
+]
+.panel[.panel-name[合并稀有类别：fct_lump_n / fct_lump_prop]
+.pull-left[
+### 函数Usage
+
+
+``` r
+fct_lump_n(f, n,
+           w = NULL,
+           other_level = "Other",
+           ties.method = "min")
+
+fct_lump_prop(f, prop,
+              w = NULL,
+              other_level = "Other")
+```
+
+| 参数 | 含义 |
+|---|---|
+| `f` | 因子向量 |
+| `n` | 保留前 n 个最常见水平 |
+| `prop` | 保留占比超过 prop 的水平 |
+| `w` | 加权频数向量（可选） |
+| `other_level` | 合并后的标签（默认 `"Other"`） |
+
+.tip-box[
+`n` 为正整数时保留最多的 n 类；`n` 为负整数时保留最少的 n 类。
+]
+]
+.pull-right[
+
+``` r
+# fct_lump_n：保留前 2 个水平，其余并成 Other
+tibble(grp = c("A","A","A","B","C","D","E","E","F")) %&gt;%
+* mutate(grp = fct_lump_n(factor(grp), n = 2)) %&gt;%
+  count(grp)
+```
+
+```
+# A tibble: 3 × 2
+  grp       n
+  &lt;fct&gt; &lt;int&gt;
+1 A         3
+2 E         2
+3 Other     4
+```
+
+
+``` r
+# fct_lump_prop：保留占比 &gt; 25% 的水平
+tibble(grp = c("A","A","A","B","C","D","E","E","F")) %&gt;%
+* mutate(grp = fct_lump_prop(factor(grp), prop = 0.25)) %&gt;%
+  count(grp)
+```
+
+```
+# A tibble: 2 × 2
+  grp       n
+  &lt;fct&gt; &lt;int&gt;
+1 A         3
+2 Other     6
+```
+]
+]
+.panel[.panel-name[显示 NA 水平：fct_na_value_to_level]
+.pull-left[
+### 函数Usage
+
+
+``` r
+fct_na_value_to_level(f, level = "(Missing)")
+```
+
+| 参数 | 含义 |
+|---|---|
+| `f` | 因子向量 |
+| `level` | NA 替换后的水平标签（默认 `"(Missing)"`） |
+
+.warn-box[
+因子中的 `NA` 默认**不计入任何水平**，在 `count()` 和图表中都会被忽略。用此函数把 NA 变成显式水平后，才能被统计和可视化。
+]
+
+``` r
+# 未处理：NA 被忽略，count 不显示
+*test1 &lt;- tibble(status = factor(c("Y","N",NA,"Y"))) %&gt;%
+  count(status) %&gt;% 
+  print()
+```
+
+```
+# A tibble: 3 × 2
+  status     n
+  &lt;fct&gt;  &lt;int&gt;
+1 N          1
+2 Y          2
+3 &lt;NA&gt;       1
+```
+
+]
+.pull-right[
+
+
+``` r
+# fct_na_value_to_level：把 NA 变成可见水平
+test2 &lt;- tibble(status = factor(c("Y","N",NA,"Y"))) %&gt;%
+* mutate(status = fct_na_value_to_level(status, "Missing")) %&gt;%
+  count(status) %&gt;% 
+  print()
+```
+
+```
+# A tibble: 3 × 2
+  status      n
+  &lt;fct&gt;   &lt;int&gt;
+1 N           1
+2 Y           2
+3 Missing     1
+```
+
+``` r
+test1$status
+```
+
+```
+[1] N    Y    &lt;NA&gt;
+Levels: N Y
+```
+
+``` r
+test2$status
+```
+
+```
+[1] N       Y       Missing
+Levels: N Y Missing
+```
+]
+]
+]
+
+---
+class: animated, fadeIn
+
+# 4.5 purrr 介绍
+
+.panelset[
+.panel[.panel-name[核心概念]
+.pull-left[
+### 核心价值
+
+`purrr` 解决的是：**对很多对象做同一件事**（函数式编程工具箱）
+
+- 对列表/向量中每个元素应用同一函数
+- 读入多个文件后对每个文件做同样清洗
+- 按组拆分数据，对每组重复建模/汇总
+- 从复杂列表中批量提取某个字段
+
+### map() 家族一览
+
+| 函数 | 返回类型 | 对应 `apply` |
+|---|---|---|
+| `map(.x, .f)` | list | `lapply()` |
+| `map_lgl()` | 逻辑向量 | — |
+| `map_int()` | 整数向量 | — |
+| `map_dbl()` | 数值向量 | `sapply(..., simplify=TRUE)` |
+| `map_chr()` | 字符向量 | — |
+| `map2(.x,.y,.f)` | list | `mapply()` |
+| `pmap(.l, .f)` | list | `mapply()` |
+| `walk(.x, .f)` | 原对象（副作用） | — |
+| `imap(.x, .f)` | list（带索引） | — |
+]
+.pull-right[
+### Lambda 函数写法
+
+purrr 支持两种 lambda 写法：
+
+
+``` r
+# 写法1：purrr 风格（~ .x，传统）
+map_dbl(x, ~ mean(.x, na.rm = TRUE))
+
+# 写法2：R 4.1+ 原生 lambda（\(x)，更通用）
+map_dbl(x, \(x) mean(x, na.rm = TRUE))
+```
+
+### across() vs map()
+
+| 场景 | 工具 |
+|---|---|
+| 对数据框**多列**做变换/汇总 | `across()` |
+| 对**列表中每个元素**迭代处理 | `map()` |
+| 对**多个文件/模型**重复处理 | `map()` |
+
+.warn-box[
+想得到数值向量却用了 `map()` → 结果是 list！  
+明确返回类型，用对应的 `map_dbl()` / `map_chr()` 等。
+]
+]
+]
+.panel[.panel-name[map()：单输入迭代]
+.pull-left[
+### 函数Usage
+
+
+``` r
+map(.x, .f, ...)
+map_lgl(.x, .f, ...)
+map_int(.x, .f, ...)
+map_dbl(.x, .f, ...)
+map_chr(.x, .f, ...)
+```
+
+| 参数 | 含义 |
+|---|---|
+| `.x` | 向量或列表，每次取出一个元素 |
+| `.f` | 应用的函数，可以是函数名、lambda `~`、`\(x)` |
+| `...` | 传给 `.f` 的额外参数 |
+
+### 三种传函数的方式
+
+
+``` r
+# 方式1：函数名（无额外参数时）
+map_dbl(x, mean)
+
+# 方式2：purrr lambda（需传额外参数）
+map_dbl(x, ~ mean(.x, na.rm = TRUE))
+
+# 方式3：R 原生 lambda（R 4.1+）
+map_dbl(x, \(x) mean(x, na.rm = TRUE))
+```
+
+.tip-box[
+`.f` 也可以是**字符串**或**整数**——用于从列表中按名/按位置提取元素。
+]
+]
+.pull-right[
+.small[
+
+``` r
+scores &lt;- list(A班 = c(80, 90, 85, NA),
+               B班 = c(78, 88, 92))
+
+# map() 返回 list
+map(scores, mean)
+```
+
+```
+$A班
+[1] NA
+
+$B班
+[1] 86
+```
+
+
+``` r
+# map_dbl() 返回数值向量（需传 na.rm）
+*map_dbl(scores, ~ mean(.x, na.rm = TRUE))
+```
+
+```
+A班 B班 
+ 85  86 
+```
+
+
+``` r
+# 按名提取嵌套列表字段
+people &lt;- list(list(name="Alice", age=25),
+               list(name="Bob",   age=30))
+*map_chr(people, "name")
+```
+
+```
+[1] "Alice" "Bob"  
+```
+
+``` r
+map_int(people, "age")
+```
+
+```
+[1] 25 30
+```
+
+``` r
+map_chr(people, "age")
+```
+
+```
+[1] "25.000000" "30.000000"
+```
+
+
+``` r
+# 按位置提取：取每个向量的第1个元素
+map_dbl(list(c(1,2,3), c(4,5,6)), 1)
+```
+
+```
+[1] 1 4
+```
+]
+]
+]
+.panel[.panel-name[map2() &amp; pmap()：多输入迭代]
+.pull-left[
+### 函数Usage
+
+
+``` r
+# 两个输入同步迭代
+map2(.x, .y, .f, ...)
+map2_dbl(.x, .y, .f, ...)   # 及其他类型变体
+
+# 多个输入（从 list 取列）
+pmap(.l, .f, ...)
+pmap_dbl(.l, .f, ...)
+```
+
+| 函数 | 说明 |
+|---|---|
+| `map2(.x, .y, .f)` | 每次把 `.x[[i]]` 和 `.y[[i]]` 同时传给 `.f` |
+| `pmap(.l, .f)` | `.l` 是列表，每次把 `.l[[1]][[i]]`, `.l[[2]][[i]]`... 传给 `.f` |
+
+]
+.pull-right[
+
+``` r
+# map2：同时迭代两个向量
+x &lt;- c(1, 10, 100)
+y &lt;- c(2,  3,   4)
+options(scipen = 200) #取消科学计数法
+map2_dbl(x, y, ~ .x ^ .y)   # 分别计算 1^2, 10^3, 100^4
+```
+
+```
+[1]         1      1000 100000000
+```
+
+
+``` r
+# map2 实用场景：给每组数据加自定义标签
+groups  &lt;- list(A班 = c(80,90,85), B班 = c(78,88,92))
+labels  &lt;- c("A班均分", "B班均分")
+map2_chr(groups, labels, ~ paste0(.y, ": ", round(mean(.x), 1)))
+```
+
+```
+          A班           B班 
+"A班均分: 85" "B班均分: 86" 
+```
+
+
+``` r
+# pmap：list每个对象依次作为参数（批量计算）
+params &lt;- list(x = c(1, 2, 3), y = c(2, 3, 4), z = c(10, 20, 30))
+*pmap_dbl(params, \(x, y, z) x * y + z)
+```
+
+```
+[1] 12 26 42
+```
+
+.tip-box[
+`pmap()` 的 `.l` 若是 **data frame**，则每一行作为一次函数调用的参数——非常适合批量参数化计算！
+]
+]
+]
+.panel[.panel-name[map() / map2() / pmap()]
+&lt;img src="purrr.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+]
+.panel[.panel-name[作用于 data frame]
+.pull-left[
+### map()：按列迭代
+
+data frame 本质是列的列表，`map()` 默认**按列**迭代，每次取出一列：
+
+
+``` r
+map_chr(df, class)               # 每列的类型
+map_int(df, ~ sum(is.na(.x)))    # 每列 NA 数
+map_dbl(df, mean, na.rm = TRUE)  # 每列均值
+```
+
+### map2()：两个 df 对应列配对
+
+`map2(df1, df2, .f)` 把两表**对应列**（第 i 列 vs 第 i 列）同时传给函数：
+
+
+``` r
+map2(df1, df2, ~ .x + .y)   # 对应列逐元素相加
+map2(df1, df2, cor)          # 对应列分别做相关
+```
+
+### pmap()：按行迭代
+
+`pmap()` 把 data frame **每一行**各列值作为具名参数传给函数（列名 = 参数名）：
+
+
+``` r
+pmap(df, \(col1, col2, ...) ...)
+```
+
+.tip-box[
+按列得到向量 → `map()`；两 df 对应列 → `map2()`；按行 → `pmap()`
+]
+]
+.pull-right[
+.small[
+
+``` r
+# map：按列迭代
+map_chr(df, class)
+```
+
+```
+         id        name         age      gender       score  department 
+  "integer" "character"   "numeric" "character"   "numeric" "character" 
+enroll_date 
+"character" 
+```
+
+
+``` r
+map_int(df, ~ sum(is.na(.x)))
+```
+
+```
+         id        name         age      gender       score  department 
+          0           0           1           0           1           0 
+enroll_date 
+          0 
+```
+
+
+``` r
+# map2：两个 df 对应列配对运算
+df1 &lt;- tibble(a = c(1,2,3), b = c(4,5,6))
+df2 &lt;- tibble(a = c(10,20,30), b = c(40,50,60))
+*map2(df1, df2, ~ .x + .y)
+```
+
+```
+$a
+[1] 11 22 33
+
+$b
+[1] 44 55 66
+```
+
+
+``` r
+# pmap：按行计算（列名 = 函数参数名）
+params &lt;- tibble(x = c(1,2,3), y = c(2,3,4), z = c(10,20,30))
+*pmap_dbl(params, \(x, y, z) x * y + z)
+```
+
+```
+[1] 12 26 42
+```
+]
+]
+]
+]
+
+---
+name: sec5
+class: inverse, center, middle, animated, fadeIn
+
+# § 5
+# 与 SAS / SQL 的概念对照
+
+.section-num[5]
+
+.footnote[[&amp;#8593; 返回目录](#toc)]
+
+---
+class: animated, fadeIn
+
+# 5.1 单表操作对照总表
+
+| 操作 | tidyverse（dplyr / tidyr） | SAS / SQL 概念 |
+|---|---|---|
+| 新建/变换列 | `mutate(x = expr, y = ifelse(...), z = case_when(...))` | Data Step 赋值；`IF-THEN-ELSE` / `IFC` |
+| 按条件保留行 | `filter(var1 &gt; 100, var2 == "A")` | Data Step `IF ... THEN OUTPUT`；SQL `WHERE` |
+| 选列 / 丢列 | `select(a, b)` / `select(-c)` | `KEEP` / `DROP`；SQL `SELECT` |
+| 排序 | `arrange(desc(var1), var2)` | `PROC SORT; BY DESCENDING var1 var2;` |
+| 去重行 | `distinct()` / `distinct(id, .keep_all = TRUE)` | `PROC SORT NODUPKEY` / `NODUPRECS` |
+| 分组汇总 | `group_by + summarize + ungroup()` | `PROC MEANS` / `PROC SQL GROUP BY` |
+| 快速频数 | `count(x)` / `add_count(x)` | `PROC FREQ`；SQL `GROUP BY + COUNT(*)` |
+| 纵向合并 | `bind_rows(df1, df2, df3)` | 多数据集 `SET`（栈叠） |
+| 横向按键合并 | `inner/left/full_join` | `PROC SQL JOIN` / `MERGE BY` |
+| 宽长变换 | `pivot_longer` / `pivot_wider` | `PROC TRANSPOSE` |
+| 缺失值处理 | `drop_na()` / `fill()` / `replace_na()` | `IF MISSING THEN DELETE` / `RETAIN` / `COALESCE` |
+| 键质检 | `anti_join` / `semi_join` | 查孤儿键 / 检查匹配是否存在 |
+
+
+---
+class: animated, fadeIn
+
+# 5.2 Data Step vs dplyr 管道
+
+.pull-left[
+### SAS Data Step 典型顺序
+
+```sas
+DATA output;
+  SET input;                   /* 读入 */
+  IF score &gt;= 60 THEN pass = 1;/* 条件变量 */
+  ELSE                  pass = 0;
+  IF department IN ("Sales","IT");  /* 筛行 */
+  KEEP id name department score pass;
+RUN;
+
+PROC SORT DATA = output;
+  BY department DESCENDING score;
+RUN;
+
+PROC MEANS DATA = output;
+  BY department;
+  VAR score;
+RUN;
+```
+]
+
+.pull-right[
+### R dplyr 管道等价写法
+
+
+``` r
+output &lt;- input %&gt;%
+  mutate(                          # 条件变量
+    pass = if_else(score &gt;= 60,
+                   TRUE, FALSE,
+                   missing = FALSE)
+  ) %&gt;%
+  filter(department %in%           # 筛行
+           c("Sales","IT")) %&gt;%
+  select(id, name,                 # 投影列
+         department, score, pass) %&gt;%
+  arrange(department,              # 排序
+          desc(score)) %&gt;%
+  group_by(department) %&gt;%         # 分组
+  summarize(                       # 汇总
+    avg_score = mean(score,
+                     na.rm = TRUE),
+    .groups = "drop"
+  )
+```
+]
+
+---
+class: animated, fadeIn
+
+# 5.3 类型专题 SAS 对照
+
+| 本章主题 | tidyverse 代表用法 | SAS / SQL 更接近的思路 |
+|---|---|---|
+| 字符串清洗 | `str_detect()`, `str_replace_all()`, `str_extract()` | `INDEX/FIND/SCAN/COMPRESS/TRANWRD`；SQL `LIKE/SUBSTR/CASE WHEN` |
+| 日期解析与拆分 | `ymd()`, `month()`, `wday()`, `floor_date()` | `input(..., yymmdd10.)`, `year()`, `month()`, `weekday()`, `intnx()` |
+| 因子顺序与合并 | `fct_relevel()`, `fct_infreq()`, `fct_lump_n()` | SAS 无直接等价；靠格式映射和报表/作图时控制显示顺序 |
+| 列级批量处理 | `across(where(is.numeric), mean)` | SAS array、宏变量循环；`PROC` 一次指定多个分析变量 |
+| 列表/多对象迭代 | `map()`, `map_dbl()`, `split() %&gt;% map()` | 宏循环；对多个数据集重复运行 DATA step / PROC |
+
+
+---
+name: homework
+class: animated, fadeIn
+
+# 课后作业
+
+.pull-left[
+### Part A：行/列操作（dplyr）
+
+1. 筛选满足下列条件的记录：
+   - `score` 缺失的员工
+   - `department` ∈ {Sales, IT}，且 `age` 在 25-35 之间
+   - 分数 ≥ 85，但不属于 HR
+
+2. 基于 `df` 生成新变量：
+   - `score` 分成至少 3 档，处理缺失
+   - `age` 变成年龄分层变量
+   - 标记是否属于"高分人群"
+
+3. 按 `department` 汇总：
+   - 各部门人数、非缺失人数、均分、标准差、最高分
+   - 哪个部门均分最高？这个结论可靠吗？
+]
+
+.pull-right[
+### Part B：连接与日期
+
+4. `enroll_date` 与 `department` 清洗：
+   - 把 `enroll_date` 解析为标准 `Date` 格式
+   - 找出最早入组的员工
+   - 按 `department` 找各部门最早入组日期
+
+5. 多表连接练习：
+   - 建立一张部门名称映射表并 join 回 `df`
+   - 故意让映射表漏掉一个部门
+   - 用 `anti_join()` 找出未匹配记录
+
+.note-box[
+💡 以上作业均基于本章演示数据 `df` 完成
+]
+]
+
+---
+name: summary
+class: animated, fadeIn, center, middle, inverse
+
+# 本章小结
+
+.large[
+**Tidyverse Core** → tibble · 管道 · 数据探索
+
+**Data Transformation** → filter · mutate · select · group_by · summarize · across
+
+**Joining &amp; Reshaping** → *_join · bind_rows · pivot_longer · pivot_wider · 缺失值
+
+**Type-Specific** → stringr · lubridate · forcats · purrr
+
+**SAS/SQL 对照** → 分析逻辑可迁移
+
+.green[
+参考书籍：R for Data Science [r4ds.hadley.nz](https://r4ds.hadley.nz/)
+]
+]
+
+
+---
+class: animated, fadeIn, center, middle
+
+# 谢谢！
+
+.large[作者：王靖雅]
+
+.gray[第四章 · 数据处理与清洗 · 2026]
+
+.footnote[本 slides 使用 [xaringan](https://github.com/yihui/xaringan) 制作]
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "atom-one-dark",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9",
+"slideNumberFormat": "<div class=\"progress-bar-container\">\n  <div class=\"progress-bar\" style=\"width: calc(%current% / %total% * 100%);\"></div>\n</div>"
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
