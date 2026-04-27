@@ -1567,6 +1567,7 @@ employees %>%
 ```
 ]
 .pull-right[
+.small[
 ### 不报错案例
 ```{r}
 ## left_join以左表键值为准
@@ -1581,7 +1582,7 @@ employees %>% filter(id != 1) %>%
 employees %>% filter(id != 1) %>% 
   inner_join(sales %>% filter(id != 4), by = "id", unmatched = "error")
 ```
-
+]
 ]
 ]
 .panel[.panel-name[relationship]
