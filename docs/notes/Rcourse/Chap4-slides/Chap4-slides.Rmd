@@ -1602,14 +1602,15 @@ employees %>% filter(id != 1) %>%
 .warn-box[
 不声明时，`many-to-many` 会自行重复匹配！关系声明后，若实际关系不符会**直接报错**，是发现不匹配情况的保底手段。
 ]
-]
-.pull-right[
+
 ```{r}
 # one-to-one：每个员工只对应一条销售记录
 employees %>%
   left_join(sales, by = "id",
             relationship = "one-to-one")
 ```
+]
+.pull-right[
 
 ```{r error=TRUE}
 # 声明 one-to-one 但实际有重复键 → 报错
@@ -1617,6 +1618,10 @@ sales_dup <- bind_rows(sales, tibble(id = 2L, sales = 999))
 employees %>%
   left_join(sales_dup, by = "id",
             relationship = "one-to-one")
+
+# 不声明 → 出现重复map不报错
+employees %>%
+  left_join(sales_dup, by = "id")
 ```
 ]
 ]

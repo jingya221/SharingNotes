@@ -2434,8 +2434,7 @@ employees %&gt;% filter(id != 1) %&gt;%
 .warn-box[
 不声明时，`many-to-many` 会自行重复匹配！关系声明后，若实际关系不符会**直接报错**，是发现不匹配情况的保底手段。
 ]
-]
-.pull-right[
+
 
 ``` r
 # one-to-one：每个员工只对应一条销售记录
@@ -2453,6 +2452,8 @@ employees %&gt;%
 3     3 Charlie   500
 4    NA XXX       200
 ```
+]
+.pull-right[
 
 
 ``` r
@@ -2467,6 +2468,23 @@ employees %&gt;%
 Error in `left_join()`:
 ! Each row in `x` must match at most 1 row in `y`.
 ℹ Row 2 of `x` matches multiple rows in `y`.
+```
+
+``` r
+# 不声明 → 出现重复map不报错
+employees %&gt;%
+  left_join(sales_dup, by = "id")
+```
+
+```
+# A tibble: 5 × 3
+     id name    sales
+  &lt;dbl&gt; &lt;chr&gt;   &lt;dbl&gt;
+1     1 Alice      NA
+2     2 Bob      1000
+3     2 Bob       999
+4     3 Charlie   500
+5    NA XXX       200
 ```
 ]
 ]
