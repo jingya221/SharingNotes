@@ -2236,7 +2236,7 @@ left_join(x, y, by = join_by(id, visit))
 | `FALSE` | 只保留左表键列 |
 
 .tip-box[
-调试连接结果时用 `keep = TRUE` 可以直接看到两侧键的对应关系，确认 join 正确后再去掉。
+调试连接结果时用 `keep = TRUE` 可以直接看到两侧键的对应关系，确认 join 正确后再去掉。如果两侧键列明一致的话，会按照默认加上`.x` / `.y`。
 ]
 ]
 .pull-right[
@@ -2257,6 +2257,21 @@ employees2 %&gt;%
 2      2 Bob         2  1000
 3      3 Charlie     3   500
 4     NA XXX        NA   200
+```
+
+``` r
+employees %&gt;% 
+  left_join(sales, by = 'id', keep = TRUE)
+```
+
+```
+# A tibble: 4 × 4
+   id.x name     id.y sales
+  &lt;int&gt; &lt;chr&gt;   &lt;dbl&gt; &lt;dbl&gt;
+1     1 Alice      NA    NA
+2     2 Bob         2  1000
+3     3 Charlie     3   500
+4    NA XXX        NA   200
 ```
 ]
 ]

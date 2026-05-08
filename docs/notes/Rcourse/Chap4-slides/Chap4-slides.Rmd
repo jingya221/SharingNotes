@@ -1505,7 +1505,7 @@ left_join(x, y, by = join_by(id, visit))
 | `FALSE` | 只保留左表键列 |
 
 .tip-box[
-调试连接结果时用 `keep = TRUE` 可以直接看到两侧键的对应关系，确认 join 正确后再去掉。
+调试连接结果时用 `keep = TRUE` 可以直接看到两侧键的对应关系，确认 join 正确后再去掉。如果两侧键列明一致的话，会按照默认加上`.x` / `.y`。
 ]
 ]
 .pull-right[
@@ -1515,6 +1515,9 @@ employees2 <- rename(employees, subjid = id)
 # keep = TRUE：保留两边键列，方便核对映射
 employees2 %>% 
   left_join(sales, by = join_by(subjid == id), keep = TRUE)
+
+employees %>% 
+  left_join(sales, by = 'id', keep = TRUE)
 ```
 ]
 ]
