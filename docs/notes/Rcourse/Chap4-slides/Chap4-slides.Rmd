@@ -900,7 +900,7 @@ df %>%
 ]
 .pull-right[
 .tip-box[
-若需让 NA 保持 NA，应先写 `is.na(x) ~ NA_character_`，`TRUE ~ "D"`和`.default = "D"`兜底均会改变NA值。
+若需让 NA 保持 NA，应先写 `is.na(x) ~ NA_character_`，`TRUE ~ "C"`和`.default = "C"`兜底均会改变NA值。
 ]
 
 ```{r}
