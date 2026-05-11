@@ -20,7 +20,7 @@ ds_all2 <- fct_split_long_vars(ds_all1)
 ## 匹配epoch：fct_add_epoch / fct_compute_epoch
 > 匹配epoch，需具备变量XXSEQ（`fct_add_epoch`）。
 > 
-> `fct_compute_epoch`（2026-04-08）为更新版本，epoch匹配逻辑更精确。【推荐使用】
+> `fct_compute_epoch` 为新增部门function版本，epoch匹配逻辑更精确。【推荐使用】
 
 调用案例：
 ```R
@@ -52,7 +52,7 @@ ds_final <- fct_compute_epoch(ds_all4, compdtc = "DSSTDTC", se_ds = sdtmqc$se)
 ## 排序并添加序号：fct_sort_addseq / fct_sort_add_seq
 > 基于spec（metacore）中定义的key_seq进行排序；可选是否按SAS风格将NA排在前面，并可自动添加当前domain的`--SEQ`变量。
 >
-> `fct_sort_add_seq` 为更新版本（2026-04-16），增加了 `var_ord` 参数支持手动指定排序变量，并使用 `logger` 记录日志；旧版 `fct_sort_addseq`（2026-03-27）仍可用。
+> `fct_sort_add_seq` 为新增部门function版本，增加了 `var_ord` 参数支持手动指定排序变量，并使用 `logger` 记录日志；旧版 `fct_sort_addseq`仍可用。
 
 调用案例：
 ```R
@@ -194,7 +194,7 @@ fct_qc(domain = Domain, output_txt = T, show_result = T,
 ![alt text](image-23.png)
 ![alt text](image-24.png)
 
-
+<!-- 
 ## 数据截取：sdtm_cutoff
 > 对SDTM域数据应用截取规则，参考数据截取规则.txt / u_sdtm_dco.sas。支持按domain分组批量处理，截取后通过`fct_final_output2xpt`输出xpt文件。
 
@@ -232,6 +232,7 @@ sdtm_cutoff(input_list = raw, cutoff_date = "01APR2026", mode = "qc")
 | `mode` | `"main"` | `"main"` 或 `"qc"`，决定读取路径 |
 | `language` | `settings$LANGUAGE` | `"EN"` 或 `"CN"`，控制 ONGOING 等文本常量 |
 | `spec_metacore` | 自动读取 | 内置变量，会自动从运行环境读取 |
+-->
 
 ## 输出部分调用案例
 
