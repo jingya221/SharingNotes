@@ -1,19 +1,29 @@
 # 03-内置funcion介绍
 
 ## 字段截取：fct_cut_text和fct_split_long_vars
-> fct_split_long_vars会自动识别数据中长度字符超过200的变量并进行cut；
-> fct_cut_text为其内置函数，用于将一个字段按照固定长度进行分割；
+> `fct_split_long_vars` 会自动识别数据中字节长度超过 `bytes_limit`（默认200）的字符变量并进行分割；
+> `fct_cut_text` 为其内置函数，用于将单个字段按照固定字节长度进行分割，支持按词边界或指定分隔符切分。
 
 调用案例：
 ```R
+## 最简调用（默认按词边界切分，分隔符为 ,.;!?）
 ds_all2 <- fct_split_long_vars(ds_all1)
+
+## 按指定分隔符切分（不保留词边界）
+ds_all2 <- fct_split_long_vars(ds_all1, bytes_limit = 200, keepwordfl = "N", dlmchars = ",.;")
+
+## 每个分段必须以分隔符结尾（适用于CM等Domian字段处理）
+ds_all2 <- fct_split_long_vars(ds_all1, bytes_limit = 200, endchar_dlmchars_fl = "Y", dlmchars = ";")
 ```
 
 | 参数 | 默认值 | 说明 |
 |------|--------|------|
 | `data` | — | 传入数据 |
 | `bytes_limit` | `200` | 每个变量允许的最大字节数 |
-| `exclude_vars` | `NULL` | 可传入字符向量排除无需处理的变量 |
+| `keepwordfl` ⭐ | `"Y"` | 是否按词边界切分：`"Y"` 时，截断处若为词中间则将末尾不完整的词移至下一分段，与SAS `u_string_split keepwordfl=Y` 行为一致 |
+| `endchar_dlmchars_fl` ⭐ | `"N"` | `"Y"` 时每个分段必须以 `dlmchars` 中指定的字符结尾（同时强制 `keepwordfl="N"`） |
+| `dlmchars` ⭐ | `",.;!?"` （`keepwordfl="Y"` 时）/ `NULL` | 分隔符字符集，如 `",.;!?"`；`keepwordfl="Y"` 时默认为 `",.;!?"`，空格始终作为词分隔符 |
+| `exclude_vars` | `NULL` | 可传入字符向量排除无需处理的变量，如 `c("AETERM", "AEDECOD")` |
 
 ![alt text](image-30.png)
 
