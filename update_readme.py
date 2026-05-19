@@ -67,12 +67,12 @@ def get_file_info(file_path):
     # 获取相对于docs/notes文件夹的路径来确定分类
     relative_path = Path(file_path).relative_to(Path('./docs/notes'))
     
-    # 改进分类逻辑：使用顶层文件夹作为分类，避免子目录（如slides）被误作独立分类
+    # 改进分类逻辑：使用直接父文件夹作为分类
     if relative_path.parent == Path('.'):
         category = "根目录"
     else:
-        # 使用第一级文件夹名作为分类
-        category = relative_path.parts[0]
+        # 使用直接父文件夹名作为分类
+        category = relative_path.parent.name
     
     return {
         'path': file_path,
@@ -94,6 +94,10 @@ def scan_notes_folder():
     markdown_files = []
     for file_path in notes_folder.glob('**/*.md'):
         if file_path.is_file():
+            rel = file_path.relative_to(notes_folder)
+            # 跳过嵌套超过一级的 index.md（如 slides 子目录的 index.md）
+            if file_path.name == 'index.md' and len(rel.parts) > 2:
+                continue
             file_info = get_file_info(file_path)
             markdown_files.append(file_info)
     

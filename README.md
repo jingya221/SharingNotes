@@ -22,14 +22,6 @@
 本节收录 R 语言课程（Chap4&5）的课件。
 
 
-#### [第五章：临床汇总表的计算与输出](docs/notes/Rcourse/Chap5-slides/index.md)
-> 此文档基于R培训整理
-
-
-#### [第四章：数据处理与清洗](docs/notes/Rcourse/Chap4-slides/index.md)
-> 此文档基于R培训整理
-
-
 ### 🗂️ r-project-guide
 
 #### [01-R项目结构](docs/notes/r-project-guide/01-R项目结构.md)
@@ -56,7 +48,7 @@
 ## 📊 统计信息
 
 - **指南分类**: 3 个
-- **文档数量**: 9 篇
+- **文档数量**: 7 篇
 - **最近更新**: 2026-05-19
 
 ---
