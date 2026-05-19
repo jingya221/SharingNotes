@@ -1,5 +1,7 @@
 # 第五章：临床汇总表的计算与输出
 
+> 此文档基于R培训整理
+
 <div style="position: relative; width: 100%; padding-bottom: 56.25%; height: 0; overflow: hidden;">
   <iframe 
     src="Chap5-slides.html" 

@@ -19,7 +19,7 @@
 ### 🗂️ Chap5-slides
 
 #### [第五章：临床汇总表的计算与输出](docs/notes/Rcourse/Chap5-slides/index.md)
-<div style="position: relative; width: 100%; paddi...
+> 此文档基于R培训整理
 
 
 ### 🗂️ Other-Guidelines
