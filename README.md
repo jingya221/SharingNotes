@@ -10,6 +10,18 @@
 
 ## 📚 指南内容
 
+### 🗂️ Chap4-slides
+
+#### [第四章：数据处理与清洗](docs/notes/Rcourse/Chap4-slides/index.md)
+<div style="position: relative; width: 100%; paddi...
+
+
+### 🗂️ Chap5-slides
+
+#### [第五章：临床汇总表的计算与输出](docs/notes/Rcourse/Chap5-slides/index.md)
+<div style="position: relative; width: 100%; paddi...
+
+
 ### 🗂️ Other-Guidelines
 
 #### [R-project Agent 使用指南](docs/notes/Other-Guidelines/R-project-Agent使用指南.md)
@@ -33,19 +45,23 @@
 
 
 #### [03-内置funcion介绍](docs/notes/r-project-guide/03-内置funcion介绍.md)
-> fct_split_long_vars会自动识别数据中长度字符超过200的变量并进行cut；
+> `fct_split_long_vars` 会自动识别数据中字节长度超过 `bytes_limi...
 
 
 #### [04-常见Rpackage介绍](docs/notes/r-project-guide/04-常见Rpackage介绍.md)
 > 主要介绍SHR-A1811-206项目中推荐使用到的package及相关function
 
+
+#### [05-项目中发现的SAS和R差异](docs/notes/r-project-guide/05-项目中发现的SAS和R差异.md)
+> 记录在SHR-A1811-206项目中发现的SAS和R之间的行为差异及对应处理方式
+
 ---
 
 ## 📊 统计信息
 
-- **指南分类**: 3 个
-- **文档数量**: 6 篇
-- **最近更新**: 2026-04-13
+- **指南分类**: 5 个
+- **文档数量**: 9 篇
+- **最近更新**: 2026-05-19
 
 ---
 
@@ -90,7 +106,7 @@ SharingNotes/
 
 ---
 
-*📅 最后更新: 2026-04-13*
+*📅 最后更新: 2026-05-19*
 
 <p align="center">
   © 2026 Jingya Wang | <a href="https://github.com/jingya221/SharingNotes">GitHub</a>

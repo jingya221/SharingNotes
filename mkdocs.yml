@@ -100,6 +100,10 @@ markdown_extensions:
 nav:
 - 首页: index.md
 - 笔记分类:
+  - Chap4-slides:
+    - 第四章：数据处理与清洗: notes/Rcourse/Chap4-slides/index.md
+  - Chap5-slides:
+    - 第五章：临床汇总表的计算与输出: notes/Rcourse/Chap5-slides/index.md
   - Other-Guidelines:
     - R-project Agent 使用指南: notes/Other-Guidelines/R-project-Agent使用指南.md
   - Rcourse:
@@ -109,4 +113,5 @@ nav:
     - 02-R程序常见用法: notes/r-project-guide/02-R程序常见用法.md
     - 03-内置funcion介绍: notes/r-project-guide/03-内置funcion介绍.md
     - 04-常见Rpackage介绍: notes/r-project-guide/04-常见Rpackage介绍.md
+    - 05-项目中发现的SAS和R差异: notes/r-project-guide/05-项目中发现的SAS和R差异.md
 - 项目Timeline: timeline.md
