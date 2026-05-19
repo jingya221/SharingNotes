@@ -1,5 +1,7 @@
 # 第四章：数据处理与清洗
 
+> 此文档基于R培训整理
+
 <div style="position: relative; width: 100%; padding-bottom: 56.25%; height: 0; overflow: hidden;">
   <iframe 
     src="Chap4-slides.html" 

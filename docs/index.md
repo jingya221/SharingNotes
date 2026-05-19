@@ -4,6 +4,18 @@
 
 ## 📚 指南内容
 
+### 🗂️ Chap4-slides
+
+#### [第四章：数据处理与清洗](notes/Rcourse/Chap4-slides/index)
+> 此文档基于R培训整理
+
+
+### 🗂️ Chap5-slides
+
+#### [第五章：临床汇总表的计算与输出](notes/Rcourse/Chap5-slides/index)
+<div style="position: relative; width: 100%; paddi...
+
+
 ### 🗂️ Other-Guidelines
 
 #### [R-project Agent 使用指南](notes/Other-Guidelines/R-project-Agent使用指南)
@@ -14,14 +26,6 @@
 
 #### [R 课程 Slides](notes/Rcourse/index)
 本节收录 R 语言课程（Chap4&5）的课件。
-
-
-#### [第五章：临床汇总表的计算与输出](notes/Rcourse/Chap5-slides/index)
-<div style="position: relative; width: 100%; paddi...
-
-
-#### [第四章：数据处理与清洗](notes/Rcourse/Chap4-slides/index)
-<div style="position: relative; width: 100%; paddi...
 
 
 ### 🗂️ r-project-guide
@@ -49,7 +53,7 @@
 
 ## 📊 统计信息
 
-- **指南分类**: 3 个
+- **指南分类**: 5 个
 - **文档数量**: 9 篇
 - **最近更新**: 2026-05-19
 
